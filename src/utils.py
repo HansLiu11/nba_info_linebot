@@ -1,12 +1,12 @@
 import os
 from linebot.models.messages import StickerMessage
 import requests
-import time
 import pandas as pd
 from datetime import datetime, date, timedelta, timezone
 import nba_api as nba
 from nba_api.stats.endpoints import leaguegamefinder, boxscoretraditionalv2, teamdetails
 from nba_api.stats.static import teams
+import asyncio
 
 from dotenv import load_dotenv
 from linebot import LineBotApi
@@ -29,6 +29,8 @@ headers  = {
         'Accept-Encoding': 'gzip, deflate, br',
         'Accept-Language': 'en-US,en;q=0.9',
 }
+
+loop = asyncio.get_event_loop()
 
 def send_text_message(reply_token, text):
     line_bot_api.reply_message(reply_token, TextSendMessage(text=text))
@@ -153,13 +155,13 @@ def show_todayGame(reply_token):
             if homeScore > awayScore:
                 winteam = game['homeTeam']['teamName']
                 loseteam = game['awayTeam']['teamName']
-                result += ("W {} \U0001f3c0 {}\n".format(winteam,homeScore))
-                result += ("L {} \U0001f3c0 {}\n\n".format(loseteam,awayScore))
+                result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,homeScore))
+                result += ("\U0001f62d {} \U0001f3c0 {}\n\n".format(loseteam,awayScore))
             else:
                 loseteam = game['homeTeam']['teamName']
                 winteam = game['awayTeam']['teamName']
-                result += ("W {} \U0001f3c0 {}\n".format(winteam,awayScore))
-                result += ("L {} \U0001f3c0 {}\n\n".format(loseteam,homeScore))
+                result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,awayScore))
+                result += ("\U0001f62d {} \U0001f3c0 {}\n\n".format(loseteam,homeScore))
     
     result += "Pospond: \n"         
     for game in games:
@@ -177,8 +179,8 @@ def show_Games(reply_token, date:str):
     gamedate = datetime.strptime(date,"%Y-%m-%d")
     gamedate = (gamedate - timedelta(1)).strftime('%Y-%m-%d')
     url = f"https://stats.nba.com/stats/scoreboardv3?GameDate={gamedate}&LeagueID=00"
-    
-    response = requests.get(url=url, headers=headers).json()
+    session = requests.Session()
+    response = session.get(url=url, headers=headers).json()
     games = response["scoreboard"]["games"]
     date = date.replace("-","/")
     result = ""
@@ -214,10 +216,16 @@ def show_Games(reply_token, date:str):
 def show_tmw_schedule(reply_token):
     tomorrow = (date.today() + timedelta(1)).strftime("%Y-%m-%d")
     gamedate = date.today().strftime('%Y-%m-%d')
+    
     # gamedate = (date.today() - timedelta(1)).strftime('%Y-%m-%d')
     url = f"https://stats.nba.com/stats/scoreboardv3?GameDate={gamedate}&LeagueID=00"
     
-    response = requests.get(url=url, headers=headers).json()
+    # response = await loop.run_in_executor(None,requests.get,url)
+    session = requests.Session()
+    response = session.get(url=url, headers=headers).json()
+    # async with requests.get(url=url, headers=headers) as resp:
+    #     response = await resp.json()
+        
     games = response["scoreboard"]["games"]
     tomorrow = tomorrow.replace("-","/")
     result = ""
