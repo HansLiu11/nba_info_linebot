@@ -8,7 +8,7 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 
 from utils import send_text_message
-from machine import creat_machine
+from machine import create_machine
 
 load_dotenv()
 
@@ -28,7 +28,8 @@ if channel_access_token is None:
 line_bot_api = LineBotApi(channel_access_token)
 parser = WebhookParser(channel_secret)
 
-machine = creat_machine()
+machines = {}
+machine = create_machine()
 
 @app.route("/callback", methods=["POST"])
 def callback():
@@ -78,12 +79,18 @@ def webhook_handler():
         if not isinstance(event.message.text, str):
             continue
         
-        print(f"\nFSM STATE: {machine.state}")
-        print(f"REQUEST BODY: \n{body}")
         
-        response = machine.advance(event)
+        # Create a machine for new user
+        if event.source.user_id not in machines:
+            machines[event.source.user_id] = create_machine()
+            
+        print(f"\nFSM STATE: {machines[event.source.user_id].state}")
+        print(f"REQUEST BODY: \n{body}")    
+        
+        # Advance the FSM for each MessageEvent
+        response = machines[event.source.user_id].advance(event)
         if response == False:
-            send_text_message(event.reply_token, "Not Entering any State")
+            send_text_message(event.reply_token, "Invalid, Please Try Again")
 
     return "OK"
 

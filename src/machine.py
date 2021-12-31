@@ -1,6 +1,6 @@
 from fsm import TocMachine
 
-def creat_machine():
+def create_machine():
     machine = TocMachine(
         states=["user", "lobby", "gameScores","todayGame","yesterdayGame","otherGame","showotherGame","boxScores", "showBoxscores","showStanding","gameSchedule", "statLeader","searchTeam","showTeam"],
         transitions=[

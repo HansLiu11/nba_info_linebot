@@ -218,46 +218,47 @@ def show_Games(reply_token, date:str):
     return "OK"
 
 def show_tmw_schedule(reply_token):
-    tomorrow = (date.today() + timedelta(1)).strftime("%Y-%m-%d")
-    gamedate = date.today().strftime('%Y-%m-%d')
     
-    url = f"https://stats.nba.com/stats/scoreboardv3?GameDate={gamedate}&LeagueID=00"
+    url = "https://tw.global.nba.com/stats2/season/schedule.json?countryCode=TW&days=1&locale=zh_TW&tz=%2B8"
     
     session = requests.Session()
     response = session.get(url=url, headers=headers).json()
         
-    games = response["scoreboard"]["games"]
-    tomorrow = tomorrow.replace("-","/")
+    games = response["payload"]["dates"][0]["games"]
+    tomorrow = games[0]['profile']["dateTimeEt"].split("T")[0]
+    gamedate = datetime.strptime(tomorrow,"%Y-%m-%d")
+    gamedate = (gamedate + timedelta(1)).strftime('%Y-%m-%d')
+    # tomorrow = tomorrow.replace("-","/")
     result = ""
-    result += (f"\U0001f4c6 {tomorrow} \n\n")
+    result += (f"\U0001f4c6 {gamedate} \n\n")
     if len(games) == 0:
         result += "\U0000274c No scheduled games"
     else:
         for game in games :
-            if game['gameStatusText'] != "PPD":
-                tm = game['gameStatusText'][:-3]
-                tm = datetime.strptime(tomorrow + " " + tm, '%Y/%m/%d %I:%M %p')
-                # convert ET time to Taipei time
-                tm1 = tm.replace(tzinfo=timezone.utc)
-                gametime = tm1.astimezone(timezone(timedelta(hours=13))).strftime("%I:%M %p")
-                
-                hometeam = game['homeTeam']['teamName']
-                h_wins = game['homeTeam']['wins']
-                h_losses = game['homeTeam']['losses']
-                
-                awayteam = game['awayTeam']['teamName']
-                a_wins = game['awayTeam']['wins']
-                a_losses = game['awayTeam']['losses'] 
-                
-                result += (f"\U000023f0 {gametime}\n")
-                result += (f"\U00002694 {hometeam}({h_wins}-{h_losses}) vs {awayteam}({a_wins}-{a_losses})\n\n")
+            # if game['gameStatusText'] != "PPD":
+            tm = game['profile']["dateTimeEt"]
+            tm = datetime.strptime(tm, '%Y-%m-%dT%H:%M')
+            # convert ET time to Taipei time
+            tm1 = tm.replace(tzinfo=timezone.utc)
+            gametime = tm1.astimezone(timezone(timedelta(hours=13))).strftime("%I:%M %p")
+            
+            hometeam = game['homeTeam']['profile']["nameEn"]
+            # h_wins = game['homeTeam']['wins']
+            # h_losses = game['homeTeam']['losses']
+            
+            awayteam = game['awayTeam']['profile']["nameEn"]
+            # a_wins = game['awayTeam']['wins']
+            # a_losses = game['awayTeam']['losses'] 
+            
+            result += (f"\U000023f0 {gametime}\n")
+            result += (f"\U00002694 {hometeam} vs {awayteam}\n\n")
         
-        result += "Pospond: \n"         
-        for game in games:
-            if game['gameStatusText'] == "PPD":
-                hometeam = game['homeTeam']['teamName']
-                awayteam = game['awayTeam']['teamName']
-                result += (f"\U00002694 {hometeam} V.S. {awayteam}")
+        # result += "Pospond: \n"         
+        # for game in games:
+        #     if game['gameStatusText'] == "PPD":
+        #         hometeam = game['homeTeam']['teamName']
+        #         awayteam = game['awayTeam']['teamName']
+        #         result += (f"\U00002694 {hometeam} V.S. {awayteam}")
     
     send_text_message(reply_token,result)
     return "OK"
