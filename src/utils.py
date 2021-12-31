@@ -6,7 +6,9 @@ from datetime import datetime, date, timedelta, timezone
 import nba_api as nba
 from nba_api.stats.endpoints import leaguegamefinder, boxscoretraditionalv2, teamdetails
 from nba_api.stats.static import teams
-import asyncio
+from rq import Queue
+from worker import conn
+
 
 from dotenv import load_dotenv
 from linebot import LineBotApi
@@ -30,7 +32,11 @@ headers  = {
         'Accept-Language': 'en-US,en;q=0.9',
 }
 
-loop = asyncio.get_event_loop()
+q = Queue(connection=conn)
+
+def count_words_at_url(url):
+    resp = requests.get(url)
+    return resp.json()
 
 def send_text_message(reply_token, text):
     line_bot_api.reply_message(reply_token, TextSendMessage(text=text))
@@ -217,14 +223,11 @@ def show_tmw_schedule(reply_token):
     tomorrow = (date.today() + timedelta(1)).strftime("%Y-%m-%d")
     gamedate = date.today().strftime('%Y-%m-%d')
     
-    # gamedate = (date.today() - timedelta(1)).strftime('%Y-%m-%d')
     url = f"https://stats.nba.com/stats/scoreboardv3?GameDate={gamedate}&LeagueID=00"
     
-    # response = await loop.run_in_executor(None,requests.get,url)
-    session = requests.Session()
-    response = session.get(url=url, headers=headers).json()
-    # async with requests.get(url=url, headers=headers) as resp:
-    #     response = await resp.json()
+    # session = requests.Session()
+    # response = session.get(url=url, headers=headers).json()
+    response = q.enqueue(count_words_at_url, url)
         
     games = response["scoreboard"]["games"]
     tomorrow = tomorrow.replace("-","/")

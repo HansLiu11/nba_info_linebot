@@ -1,4 +1,5 @@
 from transitions.extensions import GraphMachine
+import time
 from datetime import datetime, timedelta
 
 from utils import push_text_message, send_img_carousel, send_sticker, send_text_message, send_menu_carousel, send_button, show_Games, show_boxscore, show_standings, show_tmw_schedule, show_todayGame, showStatleader
@@ -150,7 +151,10 @@ class TocMachine(GraphMachine):
         msg = event.message.text
         
         try:
+            start = time.time()
             show_boxscore(uid,msg)
+            end = time.time()
+            print(end-start)
             img = 'https://clutchpoints.com/wp-content/uploads/2020/10/Ranking-the-top-25-NBA-Players-going-into-2021-Thumbnail-1200x900.jpg'
             labels = ["Go Back"]
             texts = ["go back to menu"]
@@ -179,8 +183,10 @@ class TocMachine(GraphMachine):
 
         uid = event.source.user_id
         reply_token = event.reply_token
+        start = time.time()
         show_tmw_schedule(reply_token)
-        
+        end = time.time()
+        print(end-start)
         img = "https://brasilturis.com.br/wp-content/uploads/2020/06/nba-define-volta-dos-jogos-para-31-de-julho-em-complexo-da-disney-1.jpg"
         labels = ["Go Back"]
         texts = ["go back to menu"]

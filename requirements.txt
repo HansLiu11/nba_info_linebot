@@ -26,6 +26,7 @@ pygraphviz==1.5
 python-dotenv==0.10.3
 pytz==2021.3
 requests==2.26.0
+rq==1.10.1
 six==1.16.0
 soupsieve==2.3.1
 transitions==0.6.9
