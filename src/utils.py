@@ -144,7 +144,8 @@ def send_button(uid, imgurl, title, discrip, texts, labels):
 def show_todayGame(reply_token):
     url = "https://tw.global.nba.com/stats2/scores/daily.json?countryCode=TW&locale=zh_TW&tz=%2B8"
     
-    response = requests.get(url=url, headers=headers).json()
+    session = requests.Session()
+    response = session.get(url=url, headers=headers).json()
     games = response["payload"]["date"]["games"]
     today = date.today().strftime("%Y/%m/%d")
     result = ""
@@ -183,17 +184,19 @@ def show_todayGame(reply_token):
             awayScore = game['boxscore']['awayScore']
             hometeam = game['homeTeam']['profile']["nameEn"]
             awayteam = game['awayTeam']['profile']["nameEn"]
-            result += (f"\U00002694 {hometeam} vs {awayteam}\n")
-            result += (f"\U0001f525 {gstatus} ")
-            result += f"{homeScore} : {awayScore}\n\n"
+            retime = game['boxscore']['periodClock']
+            result += (f"\U0001f525 {gstatus} {retime}\n")
+            result += ("{} \U0001f3c0 {}\n".format(hometeam,homeScore))
+            result += ("{} \U0001f3c0 {}\n\n".format(awayteam,awayScore))
+            
 
-    result += "Pospond: \n"         
+    result += "Pospond: "         
     for game in games:
         gstatus = game['boxscore']['statusDesc']
         if gstatus == "延期":
             hometeam = game['homeTeam']['profile']["nameEn"]
             awayteam = game['awayTeam']['profile']["nameEn"]
-            result += (f"\U00002694 {hometeam} V.S. {awayteam}")
+            result += (f"\n\U00002694 {hometeam} V.S. {awayteam}")
             
         
     # gamescore = scoreboard.ScoreBoard().games.get_dict()
@@ -229,13 +232,13 @@ def show_Games(reply_token, date:str):
                 result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,awayScore))
                 result += ("\U0001f62d {} \U0001f3c0 {}\n\n".format(loseteam,homeScore))
     
-    result += "Pospond: \n"         
+    result += "Pospond: "         
     for game in games:
         gstatus = game['boxscore']['statusDesc']
         if gstatus == "延期":
             hometeam = game['homeTeam']['profile']["nameEn"]
             awayteam = game['awayTeam']['profile']["nameEn"]
-            result += (f"\U00002694 {hometeam} V.S. {awayteam}")
+            result += (f"\n\U00002694 {hometeam} V.S. {awayteam}")
     
     send_text_message(reply_token,result)
     return "OK"
