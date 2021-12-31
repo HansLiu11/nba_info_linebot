@@ -142,10 +142,10 @@ def send_button(uid, imgurl, title, discrip, texts, labels):
      
      
 def show_todayGame(reply_token):
-    url = "https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json"
+    url = "https://tw.global.nba.com/stats2/scores/daily.json?countryCode=TW&locale=zh_TW&tz=%2B8"
     
     response = requests.get(url=url, headers=headers).json()
-    games = response["scoreboard"]["games"]
+    games = response["payload"]["date"]["games"]
     today = date.today().strftime("%Y/%m/%d")
     result = ""
     result += (f"\U0001f4c6 {today} \n\n")
@@ -153,25 +153,46 @@ def show_todayGame(reply_token):
         result += "\U0000274c No games today"
     
     for game in games :
-        if game['gameStatusText'] == "Final":
-            homeScore = game['homeTeam']['score']
-            awayScore = game['awayTeam']['score']
+        gstatus = game['boxscore']['statusDesc']
+        if gstatus == "結束":
+            homeScore = game['boxscore']['homeScore']
+            awayScore = game['boxscore']['awayScore']
             if homeScore > awayScore:
-                winteam = game['homeTeam']['teamName']
-                loseteam = game['awayTeam']['teamName']
+                winteam = game['homeTeam']['profile']["nameEn"]
+                loseteam = game['awayTeam']['profile']["nameEn"]
                 result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,homeScore))
                 result += ("\U0001f62d {} \U0001f3c0 {}\n\n".format(loseteam,awayScore))
             else:
-                loseteam = game['homeTeam']['teamName']
-                winteam = game['awayTeam']['teamName']
+                loseteam = game['homeTeam']['profile']["nameEn"]
+                winteam = game['awayTeam']['profile']["nameEn"]
                 result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,awayScore))
                 result += ("\U0001f62d {} \U0001f3c0 {}\n\n".format(loseteam,homeScore))
-    
+        elif "ET" in gstatus:
+            tm = game['profile']["dateTimeEt"]
+            tm = datetime.strptime(tm, '%Y-%m-%dT%H:%M')
+            # convert ET time to Taipei time
+            tm1 = tm.replace(tzinfo=timezone.utc)
+            gametime = tm1.astimezone(timezone(timedelta(hours=13))).strftime("%I:%M %p")
+            hometeam = game['homeTeam']['profile']["nameEn"]
+            awayteam = game['awayTeam']['profile']["nameEn"]
+            result += (f"\U00002694 {hometeam} vs {awayteam}\n")
+            result += (f"\U000023f0 {gametime}\n\n")
+            
+        else:
+            homeScore = game['boxscore']['homeScore']
+            awayScore = game['boxscore']['awayScore']
+            hometeam = game['homeTeam']['profile']["nameEn"]
+            awayteam = game['awayTeam']['profile']["nameEn"]
+            result += (f"\U00002694 {hometeam} vs {awayteam}\n")
+            result += (f"\U0001f525 {gstatus} ")
+            result += f"{homeScore} : {awayScore}\n\n"
+
     result += "Pospond: \n"         
     for game in games:
-        if game['gameStatusText'] == "PPD":
-            hometeam = game['homeTeam']['teamName']
-            awayteam = game['awayTeam']['teamName']
+        gstatus = game['boxscore']['statusDesc']
+        if gstatus == "延期":
+            hometeam = game['homeTeam']['profile']["nameEn"]
+            awayteam = game['awayTeam']['profile']["nameEn"]
             result += (f"\U00002694 {hometeam} V.S. {awayteam}")
             
         
@@ -180,12 +201,12 @@ def show_todayGame(reply_token):
     return "OK"
 
 def show_Games(reply_token, date:str):
-    gamedate = datetime.strptime(date,"%Y-%m-%d")
-    gamedate = (gamedate - timedelta(1)).strftime('%Y-%m-%d')
-    url = f"https://stats.nba.com/stats/scoreboardv3?GameDate={gamedate}&LeagueID=00"
+    # gamedate = datetime.strptime(date,"%Y-%m-%d")
+    # gamedate = (gamedate - timedelta(1)).strftime('%Y-%m-%d')
+    url = f"https://tw.global.nba.com/stats2/scores/daily.json?countryCode=TW&gameDate={date}&locale=zh_TW&tz=%2B8"
     session = requests.Session()
     response = session.get(url=url, headers=headers).json()
-    games = response["scoreboard"]["games"]
+    games = response["payload"]["date"]["games"]
     date = date.replace("-","/")
     result = ""
     result += (f"\U0001f4c6 {date} \n\n")
@@ -193,25 +214,27 @@ def show_Games(reply_token, date:str):
         result += "\U0000274c No scheduled games"
     
     for game in games :
-        if game['gameStatusText'] == "Final":
-            homeScore = game['homeTeam']['score']
-            awayScore = game['awayTeam']['score']
+        gstatus = game['boxscore']['statusDesc']
+        if gstatus == "結束":
+            homeScore = game['boxscore']['homeScore']
+            awayScore = game['boxscore']['awayScore']
             if homeScore > awayScore:
-                winteam = game['homeTeam']['teamName']
-                loseteam = game['awayTeam']['teamName']
+                winteam = game['homeTeam']['profile']["nameEn"]
+                loseteam = game['awayTeam']['profile']["nameEn"]
                 result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,homeScore))
                 result += ("\U0001f62d {} \U0001f3c0 {}\n\n".format(loseteam,awayScore))
             else:
-                loseteam = game['homeTeam']['teamName']
-                winteam = game['awayTeam']['teamName']
+                loseteam = game['homeTeam']['profile']["nameEn"]
+                winteam = game['awayTeam']['profile']["nameEn"]
                 result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,awayScore))
                 result += ("\U0001f62d {} \U0001f3c0 {}\n\n".format(loseteam,homeScore))
     
     result += "Pospond: \n"         
     for game in games:
-        if game['gameStatusText'] == "PPD":
-            hometeam = game['homeTeam']['teamName']
-            awayteam = game['awayTeam']['teamName']
+        gstatus = game['boxscore']['statusDesc']
+        if gstatus == "延期":
+            hometeam = game['homeTeam']['profile']["nameEn"]
+            awayteam = game['awayTeam']['profile']["nameEn"]
             result += (f"\U00002694 {hometeam} V.S. {awayteam}")
     
     send_text_message(reply_token,result)
@@ -243,12 +266,8 @@ def show_tmw_schedule(reply_token):
             gametime = tm1.astimezone(timezone(timedelta(hours=13))).strftime("%I:%M %p")
             
             hometeam = game['homeTeam']['profile']["nameEn"]
-            # h_wins = game['homeTeam']['wins']
-            # h_losses = game['homeTeam']['losses']
             
             awayteam = game['awayTeam']['profile']["nameEn"]
-            # a_wins = game['awayTeam']['wins']
-            # a_losses = game['awayTeam']['losses'] 
             
             result += (f"\U000023f0 {gametime}\n")
             result += (f"\U00002694 {hometeam} vs {awayteam}\n\n")
