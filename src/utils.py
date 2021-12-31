@@ -1,6 +1,7 @@
 import os
 from linebot.models.messages import StickerMessage
 import requests
+from bs4 import BeautifulSoup
 import pandas as pd
 from datetime import datetime, date, timedelta, timezone
 import nba_api as nba
@@ -264,6 +265,28 @@ def show_tmw_schedule(reply_token):
     
     send_text_message(reply_token,result)
     return "OK"
+
+def showschedule(userid):
+    # urlhead = 'https://www.basketball-reference.com'
+    url = 'https://www.msn.com/zh-tw/sports/nba/schedule'
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'}
+    source = requests.get(url, headers=headers).text
+    soup = BeautifulSoup(source, 'html.parser')
+
+    result = "\U0001F5D3 "
+
+    date = soup.find('th')
+    result += ('{}\n\n' .format(date.text))
+
+    tables = soup.find_all('tbody')
+    table = tables[0]
+    rows = table.find_all('tr')
+    for row in rows:
+        rowlist = row.text.split()
+        result += ("\U0000231A {} {}\n" .format(rowlist[0], rowlist[1]))
+        result += ("{}{} vs {}{}\n" .format(rowlist[6], rowlist[7], rowlist[11], rowlist[12]))
+
+    push_text_message(userid, result)
 
 def show_standings(uid):
     url = "https://stats.nba.com/stats/leaguestandingsv3?LeagueID=00&Season=2021-22&SeasonType=Regular%20Season"
