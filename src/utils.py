@@ -7,8 +7,7 @@ from datetime import datetime, date, timedelta, timezone
 import nba_api as nba
 from nba_api.stats.endpoints import leaguegamefinder, boxscoretraditionalv2, teamdetails
 from nba_api.stats.static import teams
-from rq import Queue
-from worker import conn
+
 
 
 from dotenv import load_dotenv
@@ -32,8 +31,6 @@ headers  = {
         'Accept-Encoding': 'gzip, deflate, br',
         'Accept-Language': 'en-US,en;q=0.9',
 }
-
-q = Queue(connection=conn)
 
 def count_words_at_url(url):
     resp = requests.get(url)
@@ -226,9 +223,8 @@ def show_tmw_schedule(reply_token):
     
     url = f"https://stats.nba.com/stats/scoreboardv3?GameDate={gamedate}&LeagueID=00"
     
-    # session = requests.Session()
-    # response = session.get(url=url, headers=headers).json()
-    response = q.enqueue(count_words_at_url, url)
+    session = requests.Session()
+    response = session.get(url=url, headers=headers).json()
         
     games = response["scoreboard"]["games"]
     tomorrow = tomorrow.replace("-","/")
@@ -265,28 +261,6 @@ def show_tmw_schedule(reply_token):
     
     send_text_message(reply_token,result)
     return "OK"
-
-def showschedule(userid):
-    # urlhead = 'https://www.basketball-reference.com'
-    url = 'https://www.msn.com/zh-tw/sports/nba/schedule'
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'}
-    source = requests.get(url, headers=headers).text
-    soup = BeautifulSoup(source, 'html.parser')
-
-    result = "\U0001F5D3 "
-
-    date = soup.find('th')
-    result += ('{}\n\n' .format(date.text))
-
-    tables = soup.find_all('tbody')
-    table = tables[0]
-    rows = table.find_all('tr')
-    for row in rows:
-        rowlist = row.text.split()
-        result += ("\U0000231A {} {}\n" .format(rowlist[0], rowlist[1]))
-        result += ("{}{} vs {}{}\n" .format(rowlist[6], rowlist[7], rowlist[11], rowlist[12]))
-
-    push_text_message(userid, result)
 
 def show_standings(uid):
     url = "https://stats.nba.com/stats/leaguestandingsv3?LeagueID=00&Season=2021-22&SeasonType=Regular%20Season"
@@ -340,10 +314,11 @@ def show_boxscore(uid, dateteam):
                                                     headers=headers)
     games = gamefinder.get_data_frames()[0]
     list = dateteam.split(" ")
-    Date = list[0]
+    Date = datetime.strptime(list[0], "%Y-%m-%d")
+    gamedate = (Date - timedelta(1)).strftime('%Y-%m-%d')
     searchteam = " ".join(list[1:])
     # print(games.head())
-    game = games[(games.GAME_DATE == Date) & (games.TEAM_NAME == searchteam)]
+    game = games[(games.GAME_DATE == gamedate) & (games.TEAM_NAME == searchteam)]
     gid = game['GAME_ID'].tolist()[0]
     searchteam_abbr = game['TEAM_ABBREVIATION'].values[0]
     opp_team = games[(games.GAME_ID==gid) & (games.TEAM_NAME != searchteam)]['TEAM_NAME'].values[0]

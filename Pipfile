@@ -15,6 +15,7 @@ bs4 = "*"
 pandas = "*"
 nba-api = "*"
 rq = "*"
+graphviz = "*"
 
 [requires]
 python_version = "3.8"
