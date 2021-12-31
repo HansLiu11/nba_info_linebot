@@ -286,46 +286,69 @@ def show_tmw_schedule(reply_token):
     return "OK"
 
 def show_standings(uid):
-    url = "https://stats.nba.com/stats/leaguestandingsv3?LeagueID=00&Season=2021-22&SeasonType=Regular%20Season"
+    url = "https://tw.global.nba.com/stats2/season/conferencestanding.json?locale=zh_TW"
     
-    response = requests.get(url=url, headers=headers).json()
-    teams = response['resultSets'][0]['rowSet']
+    session = requests.Session()
+    # response = requests.get(url=url, headers=headers).json()
+    response = session.get(url=url, headers=headers).json()
+    Eteams = response["payload"]["standingGroups"][0]["teams"]
+    Wteams = response["payload"]["standingGroups"][1]["teams"]
+    Eteams_rank = {}
+    Wteams_rank = {}
     resultE = '\U0001F4E2\U0001F4E2\U0001F4E2 Eastern Conference\n\n'
     resultW = '\U0001F4E2\U0001F4E2\U0001F4E2 Western Conference\n\n'
-    for team in teams:
-        rank = team[8]
-        name = team[3] + " " + team[4]
-        conf = team[6]
-        winlose = team[17].split("-")
-        win_persent = team[15]
-        gb = str(team[38]) if team[38] > 0 else '-'
-        if conf == 'East':
-            if(rank == 1):
-                resultE += ("\U0001F947 {}({})\n" .format(name,rank))
-            elif(rank == 2):
-                resultE += ("\U0001F948 {}({})\n" .format(name,rank))
-            elif(rank == 3):
-                resultE += ("\U0001F949 {}({})\n" .format(name,rank))
-            elif(rank > 3 and rank < 9):
-                resultE += ("\U0001f3c5 {}({})\n" .format(name,rank))
-            else:
-                resultE += ("\U00002716 {}({})\n" .format(name,rank))
+    for team in Eteams:
+        conf = response["payload"]["standingGroups"][0]["displayConference"]
+        tname = team["profile"]["cityEn"] + " " + team["profile"]["nameEn"]
+        wins = team["standings"]["wins"]
+        losses = team["standings"]["losses"]
+        winp = team["standings"]["winPct"]
+        rank = team["standings"]["confRank"]
+        gb = team["standings"]["confGamesBehind"]
 
-            resultE += (f"{winlose[0]} W, {winlose[1]} L, {win_persent} W/L%, {gb} GB\n")
+        Eteams_rank[rank] = [conf, tname, wins, losses, winp, gb]
+        
+    for team in Wteams:
+        conf = response["payload"]["standingGroups"][0]["displayConference"]
+        tname = team["profile"]["cityEn"] + " " + team["profile"]["nameEn"]
+        wins = team["standings"]["wins"]
+        losses = team["standings"]["losses"]
+        winp = team["standings"]["winPct"]
+        rank = team["standings"]["confRank"]
+        gb = team["standings"]["confGamesBehind"]
+
+        Wteams_rank[rank] = [conf, tname, wins, losses, winp, gb]
+        
+    for rank in range(1,len(Eteams_rank)+1):
+        team = Eteams_rank[rank]
+        if(rank == 1):
+            resultE += ("\U0001F947 {}({})\n" .format(team[1],rank))
+        elif(rank == 2):
+            resultE += ("\U0001F948 {}({})\n" .format(team[1],rank))
+        elif(rank == 3):
+            resultE += ("\U0001F949 {}({})\n" .format(team[1],rank))
+        elif(rank > 3 and rank < 9):
+            resultE += ("\U0001f3c5 {}({})\n" .format(team[1],rank))
+        else:
+            resultE += ("\U00002716 {}({})\n" .format(team[1],rank))
+
+        resultE += (f"{team[2]} W, {team[3]} L, {team[4]} W/L%, {team[5]} GB\n")
+    
+    for rank in range(1,len(Eteams_rank)+1):
+        team = Wteams_rank[rank]
+        if(rank == 1):
+            resultW += ("\U0001F947 {}({})\n" .format(team[1],rank))
+        elif(rank == 2):
+            resultW += ("\U0001F948 {}({})\n" .format(team[1],rank))
+        elif(rank == 3):
+            resultW += ("\U0001F949 {}({})\n" .format(team[1],rank))
+        elif(rank > 3 and rank < 9):
+            resultW += ("\U0001f3c5 {}({})\n" .format(team[1],rank))
+        else:
+            resultW += ("\U00002716 {}({})\n" .format(team[1],rank))
+
+        resultW += (f"{team[2]} W, {team[3]} L, {team[4]} W/L%, {team[5]} GB\n")
             
-        elif conf == "West":
-            if(rank == 1):
-                resultW += ("\U0001F947 {}({})\n" .format(name,rank))
-            elif(rank == 2):
-                resultW += ("\U0001F948 {}({})\n" .format(name,rank))
-            elif(rank == 3):
-                resultW += ("\U0001F949 {}({})\n" .format(name,rank))
-            elif(rank > 3 and rank < 9):
-                resultW += ("\U0001f3c5 {}({})\n" .format(name,rank))
-            else:
-                resultW += ("\U00002716 ({})\n" .format(name,rank))
-
-            resultW += (f"{winlose[0]} W, {winlose[1]} L, {win_persent} W/L%, {gb} GB\n")
     push_text_message(uid,resultE)
     push_text_message(uid,resultW)
     
