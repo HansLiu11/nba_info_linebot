@@ -225,12 +225,17 @@ def show_Games(reply_token, date:str):
                 winteam = game['homeTeam']['profile']["nameEn"]
                 loseteam = game['awayTeam']['profile']["nameEn"]
                 result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,homeScore))
-                result += ("\U0001f62d {} \U0001f3c0 {}\n\n".format(loseteam,awayScore))
+                result += ("\U0001f62d {} \U0001f3c0 {}\n".format(loseteam,awayScore))
             else:
                 loseteam = game['homeTeam']['profile']["nameEn"]
                 winteam = game['awayTeam']['profile']["nameEn"]
                 result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,awayScore))
-                result += ("\U0001f62d {} \U0001f3c0 {}\n\n".format(loseteam,homeScore))
+                result += ("\U0001f62d {} \U0001f3c0 {}\n".format(loseteam,homeScore))
+            if len(game['urls']) > 0:
+                url = game['urls'][0]["value"]
+                result += "Highlights : " + url + "\n\n"
+            else:
+                result += "\n"
     
     result += "Pospond: "         
     for game in games:
@@ -243,46 +248,50 @@ def show_Games(reply_token, date:str):
     send_text_message(reply_token,result)
     return "OK"
 
-def show_tmw_schedule(reply_token):
+def show_tmw_schedule(uid):
     
-    url = "https://tw.global.nba.com/stats2/season/schedule.json?countryCode=TW&days=1&locale=zh_TW&tz=%2B8"
+    url = "https://tw.global.nba.com/stats2/season/schedule.json?countryCode=TW&days=2&locale=zh_TW&tz=%2B8"
     
     session = requests.Session()
     response = session.get(url=url, headers=headers).json()
         
-    games = response["payload"]["dates"][0]["games"]
-    tomorrow = games[0]['profile']["dateTimeEt"].split("T")[0]
-    gamedate = datetime.strptime(tomorrow,"%Y-%m-%d")
-    gamedate = (gamedate + timedelta(1)).strftime('%Y-%m-%d')
-    # tomorrow = tomorrow.replace("-","/")
-    result = ""
-    result += (f"\U0001f4c6 {gamedate} \n\n")
-    if len(games) == 0:
-        result += "\U0000274c No scheduled games"
-    else:
-        for game in games :
-            # if game['gameStatusText'] != "PPD":
-            tm = game['profile']["dateTimeEt"]
-            tm = datetime.strptime(tm, '%Y-%m-%dT%H:%M')
-            # convert ET time to Taipei time
-            tm1 = tm.replace(tzinfo=timezone.utc)
-            gametime = tm1.astimezone(timezone(timedelta(hours=13))).strftime("%I:%M %p")
+    dates = response["payload"]["dates"]
+    for i in range(len(dates)):
+        games = dates[i]["games"]
+        tomorrow = games[0]['profile']["dateTimeEt"].split("T")[0]
+        gamedate = datetime.strptime(tomorrow,"%Y-%m-%d")
+        gamedate = (gamedate + timedelta(1)).strftime('%Y-%m-%d')
+        # tomorrow = tomorrow.replace("-","/")
+        result = ""
+        result += (f"\U0001f4c6 {gamedate} \n\n")
+        if len(games) == 0:
+            result += "\U0000274c No scheduled games"
+        else:
+            for game in games :
+                gstatus = game['boxscore']['statusDesc']
+                if gstatus != "延期":
+                    tm = game['profile']["dateTimeEt"]
+                    tm = datetime.strptime(tm, '%Y-%m-%dT%H:%M')
+                    # convert ET time to Taipei time
+                    tm1 = tm.replace(tzinfo=timezone.utc)
+                    gametime = tm1.astimezone(timezone(timedelta(hours=13))).strftime("%I:%M %p")
+                    
+                    hometeam = game['homeTeam']['profile']["nameEn"]
+                    
+                    awayteam = game['awayTeam']['profile']["nameEn"]
+                    
+                    result += (f"\U000023f0 {gametime}\n")
+                    result += (f"\U00002694 {hometeam} vs {awayteam}\n\n")
             
-            hometeam = game['homeTeam']['profile']["nameEn"]
-            
-            awayteam = game['awayTeam']['profile']["nameEn"]
-            
-            result += (f"\U000023f0 {gametime}\n")
-            result += (f"\U00002694 {hometeam} vs {awayteam}\n\n")
+            result += "Pospond: "         
+            for game in games:
+                gstatus = game['boxscore']['statusDesc']
+                if gstatus == "延期":
+                    hometeam = game['homeTeam']['teamName']
+                    awayteam = game['awayTeam']['teamName']
+                    result += (f"\n\U00002694 {hometeam} V.S. {awayteam}")
         
-        # result += "Pospond: \n"         
-        # for game in games:
-        #     if game['gameStatusText'] == "PPD":
-        #         hometeam = game['homeTeam']['teamName']
-        #         awayteam = game['awayTeam']['teamName']
-        #         result += (f"\U00002694 {hometeam} V.S. {awayteam}")
-    
-    send_text_message(reply_token,result)
+        push_text_message(uid,result)
     return "OK"
 
 def show_standings(uid):
@@ -353,38 +362,44 @@ def show_standings(uid):
     push_text_message(uid,resultW)
     
 def show_boxscore(uid, dateteam):
-    info = ['TEAM_ABBREVIATION', 'PLAYER_NAME', 'MIN', 'PTS','REB', 'AST', 'STL', 'BLK', 'TO']
-    gamefinder = leaguegamefinder.LeagueGameFinder(season_nullable='2021-22',
-                                                    league_id_nullable='00',
-                                                    season_type_nullable='Regular Season',
-                                                    headers=headers)
-    games = gamefinder.get_data_frames()[0]
     list = dateteam.split(" ")
     Date = datetime.strptime(list[0], "%Y-%m-%d")
-    gamedate = (Date - timedelta(1)).strftime('%Y-%m-%d')
-    searchteam = " ".join(list[1:])
-    # print(games.head())
-    game = games[(games.GAME_DATE == gamedate) & (games.TEAM_NAME == searchteam)]
-    gid = game['GAME_ID'].tolist()[0]
-    searchteam_abbr = game['TEAM_ABBREVIATION'].values[0]
-    opp_team = games[(games.GAME_ID==gid) & (games.TEAM_NAME != searchteam)]['TEAM_NAME'].values[0]
+    url = f"https://tw.global.nba.com/stats2/scores/daily.json?countryCode=TW&gameDate={Date}&locale=zh_TW&tz=%2B8"
+    session = requests.Session()
+    response = session.get(url=url, headers=headers).json()
+    games = response["payload"]["date"]["games"]
+    searchteam = list[1]
+    for game in games:
+        if game['homeTeam']['profile']["nameEn"] == searchteam or game['awayTeam']['profile']["nameEn"] == searchteam:
+            gid = game['profile']['gameId']
+    
     print(gid)
     
-    # stats = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id = gid)
-    # stats_df = stats.player_stats.get_data_frame()
-    # stats_df = stats_df[stats_df.MIN.notnull()]
-    # player_stats = stats_df.loc[:,info]
-    # result = ("\U0001f3c0\U0001f3c0\U0001f3c0 {}\n\n" .format(searchteam))
-    # result_opp = ("\U0001f3c0\U0001f3c0\U0001f3c0 {}\n\n" .format(opp_team))
-    # for index, player in player_stats.iterrows():
-    #     if player['TEAM_ABBREVIATION'] == searchteam_abbr:
-    #         result += (f"\U0001F525\U000026f9\U0001F525 {player['PLAYER_NAME']} {player['MIN']}\n")
-    #         result += (f"{player['PTS']} PTS, {player['AST']} AST, {player['REB']} REB, {player['STL']} STL, {player['BLK']} BLK, {player['TO']} TOV\n\n")
-    #     else:
-    #         result_opp += (f"\U0001F525\U000026f9\U0001F525 {player['PLAYER_NAME']} {player['MIN']}\n")
-    #         result_opp += (f"{player['PTS']} PTS, {player['AST']} AST, {player['REB']} REB, {player['STL']} STL, {player['BLK']} BLK, {player['TO']} TOV\n\n")
-    # push_text_message(uid, result)
-    # push_text_message(uid, result_opp)
+    staturl = f"https://tw.global.nba.com/stats2/game/snapshot.json?countryCode=TW&gameId={gid}&locale=zh_TW&tz=%2B"
+    session = requests.Session()
+    response = session.get(url=staturl, headers=headers).json()
+    hm_player_stats = response["payload"]["homeTeam"]
+    ay_plater_stats = response["payload"]["awayTeam"]
+    if hm_player_stats['profile']["nameEn"] == searchteam:
+        searchteam = hm_player_stats['profile']['cityEn'] + searchteam
+        opp_team = ay_plater_stats['profile']['cityEn'] + ay_plater_stats['profile']["nameEn"]
+    else:
+        searchteam = ay_plater_stats['profile']['cityEn'] + searchteam
+        opp_team = hm_player_stats['profile']['cityEn'] + hm_player_stats['profile']["nameEn"]
+    result = ("\U0001f3c0\U0001f3c0\U0001f3c0 {}\n\n" .format(searchteam))
+    result_opp = ("\U0001f3c0\U0001f3c0\U0001f3c0 {}\n\n" .format(opp_team))
+    for p in hm_player_stats["gamePlayers"]:
+        player = p["profile"]
+        player_stat = p["statTotal"]
+        result += (f"\U0001F525\U000026f9\U0001F525 {player['displayNameEn']} {player['position']} {player_stat['mins']}:{player_stat['secs']}\n")
+        result += (f"{player_stat['points']} PTS, {player_stat['assists']} AST, {player_stat['rebs']} REB, {player_stat['steals']} STL, {player_stat['blocks']} BLK, {player_stat['turnovers']} TOV\n\n")
+    for p in ay_plater_stats["gamePlayers"]:
+        player = p["profile"]
+        player_stat = p["statTotal"]
+        result_opp += (f"\U0001F525\U000026f9\U0001F525 {player['displayNameEn']} {player['position']} {player_stat['mins']}:{player_stat['secs']}\n")
+        result_opp += (f"{player_stat['points']} PTS, {player_stat['assists']} AST, {player_stat['rebs']} REB, {player_stat['steals']} STL, {player_stat['blocks']} BLK, {player_stat['turnovers']} TOV\n")
+    push_text_message(uid, result)
+    push_text_message(uid, result_opp)
     
 def showStatleader(uid):
     url = "https://stats.nba.com/js/data/widgets/home_season.json"

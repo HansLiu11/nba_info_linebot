@@ -180,7 +180,7 @@ class TocMachine(GraphMachine):
 
         uid = event.source.user_id
         reply_token = event.reply_token
-        show_tmw_schedule(reply_token)
+        show_tmw_schedule(uid)
         
         img = "https://brasilturis.com.br/wp-content/uploads/2020/06/nba-define-volta-dos-jogos-para-31-de-julho-em-complexo-da-disney-1.jpg"
         labels = ["Go Back"]
