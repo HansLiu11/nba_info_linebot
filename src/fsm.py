@@ -144,7 +144,7 @@ class TocMachine(GraphMachine):
             discription = "看更多或回主選單"
             send_button(uid, img, "Watch more", discription, texts, labels)
         except:
-            send_text_message(reply_token, "Wrong format, please try again")
+            send_text_message(reply_token, "格式錯誤，請重新再試")
             self.go_back(event)
         
     def on_enter_boxScores(self, event):
@@ -169,7 +169,7 @@ class TocMachine(GraphMachine):
             send_button(uid, img, "Back to menu", discription, texts, labels)
             
         except:
-            send_text_message(reply_token, "Wrong format, please try again")
+            send_text_message(reply_token, "格式錯誤，請重新再試")
             self.go_back(event)
 
     def on_enter_showStanding(self, event):
@@ -266,7 +266,7 @@ class TocMachine(GraphMachine):
             discription = "回主選單"
             send_button(uid, img, "Back to menu", discription, texts, labels)
         except:
-            send_text_message(reply_token, "Wrong format, please try again")
+            send_text_message(reply_token, "格式錯誤，請重新再試")
             self.go_back(event)
     # def on_exit_state2(self):
     #     print("Leaving state2")
