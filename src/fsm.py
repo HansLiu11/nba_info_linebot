@@ -88,9 +88,9 @@ class TocMachine(GraphMachine):
 
         uid = event.source.user_id
         img = "https://images-na.ssl-images-amazon.com/images/I/61G5S99JAAL.jpg"
-        labels = ["Today Game", "Yesterday Game","Other Game"]
+        labels = ["今日比賽", "昨日比賽","其他比賽"]
         texts = ["today game", "yesterday game", "other game"]
-        discription = "Which date would you like to see"
+        discription = "請選擇想要看的比分日期"
         send_button(uid, img, "Game Scores", discription, texts, labels)
         
     
@@ -102,9 +102,9 @@ class TocMachine(GraphMachine):
         show_todayGame(reply_token)
         
         img = "https://cdn.nba.com/manage/2021/08/Web_Schedule_Announcement_Covers16x9-1-784x441.jpg"
-        labels = ["Game result","Go Back"]
+        labels = ["比賽數據統計","回主選單"]
         texts = ["watch game result", "go back to menu"]
-        discription = "Watch more or Back to menu"
+        discription = "看更多或回主選單"
         send_button(uid, img, "Watch more", discription, texts, labels)
 
         
@@ -117,9 +117,9 @@ class TocMachine(GraphMachine):
         show_Games(reply_token, yesterday)
         
         img = "https://cdn.nba.com/manage/2021/08/Web_Schedule_Announcement_Covers16x9-1-784x441.jpg"
-        labels = ["Game result","Go Back"]
+        labels = ["比賽數據統計","回主選單"]
         texts = ["watch game result", "go back to menu"]
-        discription = "Watch more or Back to menu"
+        discription = "看更多或回主選單"
         send_button(uid, img, "Watch more", discription, texts, labels)
     
     def on_enter_otherGame(self, event):
@@ -139,9 +139,9 @@ class TocMachine(GraphMachine):
             show_Games(reply_token, text)
             
             img = "https://cdn.nba.com/manage/2021/08/Web_Schedule_Announcement_Covers16x9-1-784x441.jpg"
-            labels = ["Game result","Go Back"]
+            labels = ["比賽數據統計","回主選單"]
             texts = ["watch game result", "go back to menu"]
-            discription = "Watch more or Back to menu"
+            discription = "看更多或回主選單"
             send_button(uid, img, "Watch more", discription, texts, labels)
         except:
             send_text_message(reply_token, "Wrong format, please try again")
@@ -163,9 +163,9 @@ class TocMachine(GraphMachine):
         try:
             show_boxscore(uid,msg)
             img = 'https://clutchpoints.com/wp-content/uploads/2020/10/Ranking-the-top-25-NBA-Players-going-into-2021-Thumbnail-1200x900.jpg'
-            labels = ["Go Back"]
+            labels = ["回主選單"]
             texts = ["go back to menu"]
-            discription = "Back to menu to watch more"
+            discription = "看更多或回主選單"
             send_button(uid, img, "Back to menu", discription, texts, labels)
             
         except:
@@ -180,9 +180,9 @@ class TocMachine(GraphMachine):
         show_standings(uid)
         
         img = "https://boundtoball.com/wp-content/uploads/2021/07/NBA-TEAM-LOGOS.jpg"
-        labels = ["Go Back"]
+        labels = ["回主選單"]
         texts = ["go back to menu"]
-        discription = "Back to menu to watch more"
+        discription = "看更多或回主選單"
         send_button(uid, img, "Back to menu", discription, texts, labels)
         
     def on_enter_gameSchedule(self, event):
@@ -190,9 +190,9 @@ class TocMachine(GraphMachine):
         
         uid = event.source.user_id
         img = "https://cdn.nba.com/manage/2020/11/nba-basketball-iso-784x441.jpg"
-        labels = ["Tomorrow Schedule", "Search Team", "Go Back"]
+        labels = ["今明兩天賽程", "球隊賽程", "回主選單"]
         texts = ["show game schedule", "search team schedule", "go back to menu"]
-        discription = "Choose one action"
+        discription = "請選擇想要查看的賽程"
         send_button(uid, img, "Schedule", discription, texts, labels)
         
     def on_enter_showSchedule(self, event):
@@ -203,9 +203,9 @@ class TocMachine(GraphMachine):
         show_tmw_schedule(uid)
         
         img = "https://brasilturis.com.br/wp-content/uploads/2020/06/nba-define-volta-dos-jogos-para-31-de-julho-em-complexo-da-disney-1.jpg"
-        labels = ["Go Back"]
+        labels = ["回主選單"]
         texts = ["go back to menu"]
-        discription = "Back to menu to watch more"
+        discription = "回主選單"
         send_button(uid, img, "Back to menu", discription, texts, labels)
     
     def on_enter_statLeader(self, event):
@@ -215,10 +215,10 @@ class TocMachine(GraphMachine):
         uid = event.source.user_id
         showStatleader(uid)
         
-        img = "https://boundtoball.com/wp-content/uploads/2021/07/NBA-TEAM-LOGOS.jpg"
-        labels = ["Go Back"]
+        img = "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2021/10/24/0/14396126.jpeg&x=0&y=0&sw=0&sh=0&sl=W&fw=1050&exp=3600"
+        labels = ["回主選單"]
         texts = ["go back to menu"]
-        discription = "Back to menu to watch more"
+        discription = "回主選單"
         send_button(uid, img, "Back to menu", discription, texts, labels)
     def on_enter_showNews(self, event):
         print("I'm entering showNews")
@@ -227,9 +227,9 @@ class TocMachine(GraphMachine):
         shownews(reply_token)
         
         img = "https://i1.wp.com/www.nbaanalysis.net/wp-content/uploads/2021/11/Key-Questions-Facing-Top-Title-Contenders-Early-In-NBA-Season-1.jpeg?resize=678%2C381&ssl=1"
-        labels = ["Go Back"]
+        labels = ["回主選單"]
         texts = ["go back to menu"]
-        discription = "Back to menu to watch more"
+        discription = "回主選單"
         send_button(uid, img, "Back to menu", discription, texts, labels)
     
     def on_enter_searchTeamsch(self, event):
@@ -260,10 +260,10 @@ class TocMachine(GraphMachine):
         text = event.message.text 
         try:
             showteamsch(reply_token, text)
-            img = "https://brasilturis.com.br/wp-content/uploads/2020/06/nba-define-volta-dos-jogos-para-31-de-julho-em-complexo-da-disney-1.jpg"
-            labels = ["Go Back"]
+            img = "https://boundtoball.com/wp-content/uploads/2021/07/NBA-TEAM-LOGOS.jpg"
+            labels = ["回主選單"]
             texts = ["go back to menu"]
-            discription = "Back to menu to watch more"
+            discription = "回主選單"
             send_button(uid, img, "Back to menu", discription, texts, labels)
         except:
             send_text_message(reply_token, "Wrong format, please try again")

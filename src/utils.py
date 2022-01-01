@@ -210,15 +210,15 @@ def send_menu_carousel(uid):
                     text='which would you like to watch?',
                     actions=[
                         MessageTemplateAction(
-                            label='Game Scores',
+                            label='查看比分',
                             text='game scores',
                         ),
                         MessageTemplateAction(
-                            label='Game BoxScores',
+                            label='比賽數據',
                             text='game box scores',
                         ),
                         MessageTemplateAction(
-                            label='Game Schedule',
+                            label='查看賽程',
                             text='game schedules',
                         )
                     ]
@@ -229,15 +229,15 @@ def send_menu_carousel(uid):
                     text='which would you like to watch?',
                     actions=[
                         MessageTemplateAction(
-                            label='Standing',
+                            label='戰績排名',
                             text='show standing',
                         ),
                         MessageTemplateAction(
-                            label='Stats Leader',
+                            label='數據排行',
                             text='show season leader',
                         ),
                         MessageTemplateAction(
-                            label='NBA News',
+                            label='NBA 新聞',
                             text='show news',
                         )
                     ]
