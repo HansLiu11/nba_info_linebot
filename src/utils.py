@@ -12,7 +12,7 @@ from nba_api.stats.static import teams
 
 from dotenv import load_dotenv
 from linebot import LineBotApi
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, TemplateSendMessage, CarouselTemplate, MessageTemplateAction, ButtonsTemplate
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, TemplateSendMessage, CarouselTemplate, MessageTemplateAction, ButtonsTemplate, URITemplateAction, FlexSendMessage
 from linebot.models.template import CarouselColumn, ImageCarouselColumn, ImageCarouselTemplate
 
 load_dotenv()
@@ -31,10 +31,6 @@ headers  = {
         'Accept-Encoding': 'gzip, deflate, br',
         'Accept-Language': 'en-US,en;q=0.9',
 }
-
-def count_words_at_url(url):
-    resp = requests.get(url)
-    return resp.json()
 
 def send_text_message(reply_token, text):
     line_bot_api.reply_message(reply_token, TextSendMessage(text=text))
@@ -70,6 +66,143 @@ def send_img_carousel(uid, urls, labels, texts):
         )
     )
     line_bot_api.push_message(uid, message)  # bot 主動送訊息
+
+def send_urlimg_carousel(uid, dicts):
+    cols = []
+    for i , dict in enumerate(dicts):
+        col = ImageCarouselColumn(
+            image_url=dict['img'],
+            action=URITemplateAction(
+                uri = dict['link'],
+                label = dict['title'][0:11]
+            )      
+        )
+        cols.append(col)
+        
+    message = TemplateSendMessage(
+        alt_text='Carousel template',
+        template=ImageCarouselTemplate(
+            columns=cols
+        )
+    )
+    line_bot_api.push_message(uid, message)
+
+def send_flex_msg(reply_token,dicts):
+    bubbles = []
+    for dict in dicts:
+        bubbles.append({
+        "type": "bubble",
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {
+                    "type": "image",
+                    "url": dict['img'],
+                    "size": "5xl",
+                    "aspectMode": "cover",
+                    "aspectRatio": "2:3",
+                    "gravity": "top"
+                },
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                    {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [
+                        {
+                            "type": "text",
+                            "text": "2021/01/01",
+                            "size": "xl",
+                            "color": "#ffffff",
+                            "weight": "bold"
+                        }
+                        ]
+                    },
+                    {
+                        "type": "box",
+                        "layout": "baseline",
+                        "contents": [
+                        {
+                            "type": "text",
+                            "text": dict['title'],
+                            "color": "#ebebeb",
+                            "size": "sm",
+                            "flex": 0,
+                            "wrap": True
+                        }
+                        ],
+                        "spacing": "lg"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [
+                        {
+                            "type": "filler"
+                        },
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "contents": [
+                                {
+                                    "type": "filler"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "More Details",
+                                    "color": "#ffffff",
+                                    "flex": 0,
+                                    "offsetTop": "-2px"
+                                },
+                                {
+                                    "type": "filler"
+                                }
+                            ],
+                            "spacing": "sm",
+                            "action": {
+                                "type": "uri",
+                                "label": "新聞",
+                                "uri": dict['link']
+                            }
+                        },
+                        {
+                            "type": "filler"
+                        }
+                        ],
+                        "borderWidth": "1px",
+                        "cornerRadius": "4px",
+                        "spacing": "sm",
+                        "borderColor": "#ffffff",
+                        "margin": "xxl",
+                        "height": "40px"
+                    }
+                    ],
+                    "position": "absolute",
+                    "offsetBottom": "0px",
+                    "offsetStart": "0px",
+                    "offsetEnd": "0px",
+                    "backgroundColor": "#03303Acc",
+                    "paddingAll": "20px",
+                    "paddingTop": "18px"
+                },
+            ],
+            "paddingAll": "0px"
+        }
+    })
+    msg = {
+        "type": "carousel",
+        "contents": bubbles
+    }
+    reply_msg = FlexSendMessage(
+        alt_text='News',
+        contents=msg
+    )
+    
+    line_bot_api.reply_message(reply_token, reply_msg)
+
 
 def send_menu_carousel(uid):
     message = TemplateSendMessage(
@@ -109,8 +242,8 @@ def send_menu_carousel(uid):
                             text='show season leader',
                         ),
                         MessageTemplateAction(
-                            label='Search Team',
-                            text='search team',
+                            label='NBA News',
+                            text='show news',
                         )
                     ]
                 ),
@@ -447,9 +580,26 @@ def showStatleader(uid):
     push_text_message(uid, result)
     
 def showTeam(uid):
-    url = "https://stats.nba.com/js/data/widgets/home_season.json"
-    response = requests.get(url=url, headers=headers).json()
+     url = "https://stats.nba.com/js/data/widgets/home_season.json"
 
+def shownews(reply_token):
+    nba_news = []
+    url = "https://nba.udn.com/nba/news/"
+    session = requests.Session()
+    response = session.get(url=url)
+    sp = BeautifulSoup(response.text, 'html.parser')   
+    out = sp.find(id="news_list_body").find('dl')
+    newses = out.find_all('a')
+    for news in newses:
+        link = "https://nba.udn.com" + news.get("href")
+        title = news.find("h3").text
+        img = news.find('img')['data-src']
+        x=['title','link','img']
+        dictionary = dict(zip(x,[title,link,img]))
+        nba_news.append(dictionary)
+    
+    send_flex_msg(reply_token,nba_news)
+    # print(nba_news)
 """
 def send_image_url(id, img_url):
     pass

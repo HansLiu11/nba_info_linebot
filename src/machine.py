@@ -2,7 +2,7 @@ from fsm import TocMachine
 
 def create_machine():
     machine = TocMachine(
-        states=["user", "lobby", "gameScores","todayGame","yesterdayGame","otherGame","showotherGame","boxScores", "showBoxscores","showStanding","gameSchedule", "statLeader","searchTeam","showTeam"],
+        states=["user", "lobby", "gameScores","todayGame","yesterdayGame","otherGame","showotherGame","boxScores", "showBoxscores","showStanding","gameSchedule", "statLeader","searchTeam","showTeam", "showNews"],
         transitions=[
             {
                 "trigger": "advance",
@@ -79,22 +79,22 @@ def create_machine():
             {
                 "trigger": "advance",
                 "source": "lobby",
-                "dest": "searchTeam",
-                "conditions": "is_going_to_searchTeam",
+                "dest": "showNews",
+                "conditions": "is_going_to_showNews",
             },
-            {
-                "trigger": "advance",
-                "source": "searchTeam",
-                "dest": "showTeam",
-                "conditions": "is_going_to_showTeam",
-            },
+            # {
+            #     "trigger": "advance",
+            #     "source": "searchTeam",
+            #     "dest": "showTeam",
+            #     "conditions": "is_going_to_showTeam",
+            # },
             {
                 "trigger": "advance", 
-                "source": ["gameScores", "yesterdayGame","todayGame", "boxScores", "showotherGame","showBoxscores" , "showStanding", "gameSchedule","statLeader","showTeam"],
+                "source": ["gameScores", "yesterdayGame","todayGame", "boxScores", "showotherGame","showBoxscores" , "showStanding", "gameSchedule","statLeader","showTeam", "showNews"],
                 "dest": "lobby",
                 "conditions": "is_going_to_backLobby",
              },
-            {"trigger": "go_back", "source": ["gameScores", "yesterdayGame","todayGame","showotherGame", "boxScores", "showBoxscores", "showStanding", "gameSchedule","statLeader","showTeam"], "dest": "lobby"},
+            {"trigger": "go_back", "source": ["gameScores", "yesterdayGame","todayGame","showotherGame", "boxScores", "showBoxscores", "showStanding", "gameSchedule","statLeader","showTeam", "showNews"], "dest": "lobby"},
         ],
         initial="user",
         auto_transitions=False,

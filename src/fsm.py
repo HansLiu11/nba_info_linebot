@@ -2,7 +2,7 @@ from transitions.extensions import GraphMachine
 import time
 from datetime import datetime, timedelta
 
-from utils import push_text_message, send_img_carousel, send_sticker, send_text_message, send_menu_carousel, send_button, show_Games, show_boxscore, show_standings, show_tmw_schedule, show_todayGame, showStatleader
+from utils import push_text_message, send_img_carousel, send_sticker, send_text_message, send_menu_carousel, send_button, show_Games, show_boxscore, show_standings, show_tmw_schedule, show_todayGame, showStatleader, shownews
 
 
 class TocMachine(GraphMachine):
@@ -55,6 +55,10 @@ class TocMachine(GraphMachine):
     def is_going_to_statLeader(self, event):
         text = event.message.text
         return text.lower() == "show season leader"
+    
+    def is_going_to_showNews(self, event):
+        text = event.message.text
+        return text.lower() == "show news"
     
     def is_going_to_searchTeam(self, event):
         text = event.message.text
@@ -196,6 +200,17 @@ class TocMachine(GraphMachine):
         showStatleader(uid)
         
         img = "https://boundtoball.com/wp-content/uploads/2021/07/NBA-TEAM-LOGOS.jpg"
+        labels = ["Go Back"]
+        texts = ["go back to menu"]
+        discription = "Back to menu to watch more"
+        send_button(uid, img, "Back to menu", discription, texts, labels)
+    def on_enter_showNews(self, event):
+        print("I'm entering showNews")
+        uid = event.source.user_id
+        reply_token= event.reply_token
+        shownews(reply_token)
+        
+        img = "https://i1.wp.com/www.nbaanalysis.net/wp-content/uploads/2021/11/Key-Questions-Facing-Top-Title-Contenders-Early-In-NBA-Season-1.jpeg?resize=678%2C381&ssl=1"
         labels = ["Go Back"]
         texts = ["go back to menu"]
         discription = "Back to menu to watch more"
