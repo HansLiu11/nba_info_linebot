@@ -1,8 +1,8 @@
 # ChatBot NBA info
 
-:basketball: **The NBA Line Bot with 6 features ! ** :basketball:
+:basketball: The NBA Line Bot with 6 features !  :basketball:
 <p align="center">
-  <img src="https://media.designrush.com/inspirations/129849/conversions/_1615382341_669_NBA-logo-preview.jpg" ,height="200" width="300"/>
+  <img src="https://media.designrush.com/inspirations/129849/conversions/_1615382341_669_NBA-logo-preview.jpg" ,height="300" width="450"/>
 </p>
 
 Watch game results, boxscores, check the schedule, standings and serch for favorite Teams 
