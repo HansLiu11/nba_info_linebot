@@ -2,7 +2,7 @@ from fsm import TocMachine
 
 def create_machine():
     machine = TocMachine(
-        states=["user", "lobby", "gameScores","todayGame","yesterdayGame","otherGame","showotherGame","boxScores", "showBoxscores","showStanding","gameSchedule", "statLeader","searchTeam","showTeam", "showNews"],
+        states=["user", "lobby", "gameScores","todayGame","yesterdayGame","otherGame","showotherGame","boxScores", "showBoxscores","showStanding","gameSchedule", "statLeader", "showNews"],
         transitions=[
             {
                 "trigger": "advance",
@@ -90,11 +90,11 @@ def create_machine():
             # },
             {
                 "trigger": "advance", 
-                "source": ["gameScores", "yesterdayGame","todayGame", "boxScores", "showotherGame","showBoxscores" , "showStanding", "gameSchedule","statLeader","showTeam", "showNews"],
+                "source": ["gameScores", "yesterdayGame","todayGame", "boxScores", "showotherGame","showBoxscores" , "showStanding", "gameSchedule","statLeader", "showNews"],
                 "dest": "lobby",
                 "conditions": "is_going_to_backLobby",
              },
-            {"trigger": "go_back", "source": ["gameScores", "yesterdayGame","todayGame","showotherGame", "boxScores", "showBoxscores", "showStanding", "gameSchedule","statLeader","showTeam", "showNews"], "dest": "lobby"},
+            {"trigger": "go_back", "source": ["gameScores", "yesterdayGame","todayGame","showotherGame", "boxScores", "showBoxscores", "showStanding", "gameSchedule","statLeader", "showNews"], "dest": "lobby"},
         ],
         initial="user",
         auto_transitions=False,
