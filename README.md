@@ -76,6 +76,7 @@ Check the scores of the games on that day(Can choose **today**, **yesterday** or
 <p align="center">
   <img src="./img/8.jpg", height="350" width="190"/>
 </p>
+
 1. **Tommorrow's schedule** - 
 Showing the game schedule today and tomorrow 
 
