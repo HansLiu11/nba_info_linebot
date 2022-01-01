@@ -41,24 +41,28 @@ pipenv shell
 
 ### Watch Games
 Check the scores of the games on that day(Can choose **today**, **yesterday** or **enter other date** you want to know)
+
 ![](./img/6.jpg)
 
-1. Today game
+1. **Today game**
 
 ![](./img/7.jpg)
 
-2. other date with hightlight links
+2. **other date with hightlight links**
 
 ![](./img/14.jpg)
 
 ### Check Schedule
 ![](./img/8.jpg)
-1. Tommorrow's schedule - 
+1. **Tommorrow's schedule** - 
 Showing the game schedule today and tomorrow 
+
 ![](./img/12.jpg)
 ![](./img/13.jpg)
-2. Team's schedule - 
+
+2. **Team's schedule** - 
 Can select one team to show their next 5 games' schedule
+
 ![](./img/9.jpg)
 ![](./img/10.jpg)
 
@@ -68,10 +72,12 @@ Showing the team standings
 
 ### Show Stats Leader
 Showing the stat leaders. (PPG / Assists / Rebounds / 3PM / Steals / Blocks)
+
 ![](./img/15.jpg)
 
 ### Show NBA news
 Show the latest 10 NBA news and links to the news
+
 ![](./img/news1.jpg)
 ![](./img/news2.jpg)
 
