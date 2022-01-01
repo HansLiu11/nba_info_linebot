@@ -64,10 +64,12 @@ Showing the game schedule today and tomorrow
 Can select one team to show their next 5 games' schedule
 
 ![](./img/9.jpg)
+
 ![](./img/10.jpg)
 
 ### Show Standings
 Showing the team standings
+
 ![](./img/11.jpg)
 
 ### Show Stats Leader
@@ -79,6 +81,7 @@ Showing the stat leaders. (PPG / Assists / Rebounds / 3PM / Steals / Blocks)
 Show the latest 10 NBA news and links to the news
 
 ![](./img/news1.jpg)
+
 ![](./img/news2.jpg)
 
 ## Reference
