@@ -1,8 +1,10 @@
+from typing import Text
+from numpy import trunc
 from transitions.extensions import GraphMachine
 import time
 from datetime import datetime, timedelta
 
-from utils import push_text_message, send_img_carousel, send_sticker, send_text_message, send_menu_carousel, send_button, show_Games, show_boxscore, show_standings, show_tmw_schedule, show_todayGame, showStatleader, shownews
+from utils import push_text_message, send_img_carousel, send_sticker, send_text_message, send_menu_carousel, send_button, show_Games, show_boxscore, show_standings, show_tmw_schedule, show_todayGame, showStatleader, shownews, showteamsch
 
 
 class TocMachine(GraphMachine):
@@ -34,6 +36,10 @@ class TocMachine(GraphMachine):
 
     def is_going_to_gameSchedule(self, event):
         text = event.message.text
+        return text.lower() == "game schedules"
+    
+    def is_going_to_showSchedule(self, event):
+        text = event.message.text
         return text.lower() == "show game schedule"
     
     def is_going_to_boxScores(self, event):
@@ -60,13 +66,13 @@ class TocMachine(GraphMachine):
         text = event.message.text
         return text.lower() == "show news"
     
-    def is_going_to_searchTeam(self, event):
+    def is_going_to_searchTeamsch(self, event):
         text = event.message.text
-        return text.lower() == "search team"
+        return text.lower() == "search team schedule" 
     
-    def is_going_to_showTeam(self, event):
+    def is_going_to_showTeamsch(self, event):
         text = event.message.text
-        return text.lower() == "show Team"
+        return True
     
     def is_going_to_backLobby(self, event):
         text = event.message.text
@@ -138,15 +144,15 @@ class TocMachine(GraphMachine):
             discription = "Watch more or Back to menu"
             send_button(uid, img, "Watch more", discription, texts, labels)
         except:
-            push_text_message(uid, "Wrong format, please try again")
+            send_text_message(reply_token, "Wrong format, please try again")
             self.go_back(event)
         
     def on_enter_boxScores(self, event):
         print("I'm entering boxScores")
-
+        reply_token = event.reply_token
         uid = event.source.user_id
         # send_text_message(reply_token, "Trigger boxScores") 
-        push_text_message(uid=uid, message="請輸入比賽日期和隊伍, Ex:2021-12-22 Magic")
+        send_text_message(reply_token, text="請輸入比賽日期和隊伍, Ex:2021-12-22 Magic")
         
     def on_enter_showBoxscores(self, event):
         print("I'm entering showBoxscores")
@@ -163,7 +169,7 @@ class TocMachine(GraphMachine):
             send_button(uid, img, "Back to menu", discription, texts, labels)
             
         except:
-            push_text_message(uid, "Wrong format, please try again")
+            send_text_message(reply_token, "Wrong format, please try again")
             self.go_back(event)
 
     def on_enter_showStanding(self, event):
@@ -180,7 +186,17 @@ class TocMachine(GraphMachine):
         send_button(uid, img, "Back to menu", discription, texts, labels)
         
     def on_enter_gameSchedule(self, event):
-        print("I'm entering gameSchedule")
+        print("I'm entering gameSchedule") 
+        
+        uid = event.source.user_id
+        img = "https://cdn.nba.com/manage/2020/11/nba-basketball-iso-784x441.jpg"
+        labels = ["Tomorrow Schedule", "Search Team", "Go Back"]
+        texts = ["show game schedule", "search team schedule", "go back to menu"]
+        discription = "Choose one action"
+        send_button(uid, img, "Schedule", discription, texts, labels)
+        
+    def on_enter_showSchedule(self, event):
+        print("I'm entering showSchedule")
 
         uid = event.source.user_id
         reply_token = event.reply_token
@@ -216,30 +232,41 @@ class TocMachine(GraphMachine):
         discription = "Back to menu to watch more"
         send_button(uid, img, "Back to menu", discription, texts, labels)
     
-    def on_enter_searchTeam(self, event):
-        print("I'm entering searchTeam")
+    def on_enter_searchTeamsch(self, event):
+        print("I'm entering searchTeamsch")
         uid = event.source.user_id
         
         netsimg = "https://adayimg.com/wp-content/uploads/2012/05/brooklyn-nets-unveil-new-nba-logo-1.jpg"
         bullsimg = "https://sportando.basketball/wp-content/uploads/2021/03/bulls-logo-e1604871991247.jpeg"
         warriorimg = "https://static-wp-tor15-prd.torcedores.com/wp-content/uploads/2019/10/warriors-521x338.png"
         mavericksimg = "https://net-storage.tcccdn.com/storage/pianetabasket.com/img_notizie/thumb3/10/109469221348e5f23f8474e72b89f815-84391-49bae5367b7dae9344cf35bd3f0f7758.jpg"
-        lakersimg = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Los_Angeles_Lakers_logo.svg/1200px-Los_Angeles_Lakers_logo.svg.png"
+        lakersimg = "https://wallpaperaccess.com/full/1126209.jpg"
         bucksimg = "https://images6.alphacoders.com/105/thumb-1920-1055946.jpg"
-        sunimg = "https://upload.wikimedia.org/wikipedia/zh/e/e8/Phoenix_Suns.jpg"
+        sunimg = "https://c4.wallpaperflare.com/wallpaper/884/795/632/basketball-phoenix-suns-logo-nba-hd-wallpaper-thumb.jpg"
         clipimg = "https://image-cdn.essentiallysports.com/wp-content/uploads/20200922131406/Clippers-Logo-e1472074589881-1.jpg" 
         
         urls = [netsimg, bullsimg,warriorimg, mavericksimg, lakersimg, bucksimg, sunimg, clipimg]
         labels = ["Nets","Bulls","Warriors","Mavericks","Lakers","Bucks","Suns","Clippers"]
-        texts = ["Brooklyn Nets","Bulls","Warriors","Mavericks","Lakers","Bucks","Suns","Clippers"]
+        texts = ["Nets","Bulls","Warriors","Mavericks","Lakers","Bucks","Suns","Clippers"]
         
         send_img_carousel(uid, urls, labels, texts)
         # send_text_message(reply_token, "Trigger boxScores") 
-        push_text_message(uid=uid, message="請選擇上面隊伍和或輸入其他隊伍, Ex:Orlando Magic")
+        push_text_message(uid, message="請選擇上面隊伍和或輸入其他隊伍, Ex:Magic")
     
-    def on_enter_showTeam(self, event):
+    def on_enter_showTeamsch(self, event):
         print("I'm entering showTeam")
         uid = event.source.user_id
-
+        reply_token = event.reply_token
+        text = event.message.text 
+        try:
+            showteamsch(reply_token, text)
+            img = "https://brasilturis.com.br/wp-content/uploads/2020/06/nba-define-volta-dos-jogos-para-31-de-julho-em-complexo-da-disney-1.jpg"
+            labels = ["Go Back"]
+            texts = ["go back to menu"]
+            discription = "Back to menu to watch more"
+            send_button(uid, img, "Back to menu", discription, texts, labels)
+        except:
+            send_text_message(reply_token, "Wrong format, please try again")
+            self.go_back(event)
     # def on_exit_state2(self):
     #     print("Leaving state2")

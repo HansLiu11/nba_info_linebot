@@ -2,7 +2,7 @@ from fsm import TocMachine
 
 def create_machine():
     machine = TocMachine(
-        states=["user", "lobby", "gameScores","todayGame","yesterdayGame","otherGame","showotherGame","boxScores", "showBoxscores","showStanding","gameSchedule", "statLeader", "showNews"],
+        states=["user", "lobby", "gameScores","todayGame","yesterdayGame","otherGame","showotherGame","boxScores", "showBoxscores","showStanding","showSchedule", "gameSchedule","searchTeamsch" ,"showTeamsch", "statLeader", "showNews"],
         transitions=[
             {
                 "trigger": "advance",
@@ -72,6 +72,12 @@ def create_machine():
             },
             {
                 "trigger": "advance",
+                "source": "gameSchedule",
+                "dest": "showSchedule",
+                "conditions": "is_going_to_showSchedule",
+            },
+            {
+                "trigger": "advance",
                 "source": "lobby",
                 "dest": "statLeader",
                 "conditions": "is_going_to_statLeader",
@@ -82,19 +88,25 @@ def create_machine():
                 "dest": "showNews",
                 "conditions": "is_going_to_showNews",
             },
-            # {
-            #     "trigger": "advance",
-            #     "source": "searchTeam",
-            #     "dest": "showTeam",
-            #     "conditions": "is_going_to_showTeam",
-            # },
+            {
+                "trigger": "advance",
+                "source": "gameSchedule",
+                "dest": "searchTeamsch",
+                "conditions": "is_going_to_searchTeamsch",
+            },
+            {
+                "trigger": "advance",
+                "source": "searchTeamsch",
+                "dest": "showTeamsch",
+                "conditions": "is_going_to_showTeamsch",
+            },
             {
                 "trigger": "advance", 
-                "source": ["gameScores", "yesterdayGame","todayGame", "boxScores", "showotherGame","showBoxscores" , "showStanding", "gameSchedule","statLeader", "showNews"],
+                "source": ["gameScores", "yesterdayGame","todayGame", "boxScores", "showotherGame","showBoxscores" , "showStanding", "gameSchedule","statLeader", "showNews", "showSchedule", "showTeamsch"],
                 "dest": "lobby",
                 "conditions": "is_going_to_backLobby",
              },
-            {"trigger": "go_back", "source": ["gameScores", "yesterdayGame","todayGame","showotherGame", "boxScores", "showBoxscores", "showStanding", "gameSchedule","statLeader", "showNews"], "dest": "lobby"},
+            {"trigger": "go_back", "source": ["gameScores", "yesterdayGame","todayGame","showotherGame","showTeamsch" ,"boxScores", "showBoxscores", "showStanding", "showSchedule","gameSchedule","statLeader", "showNews", "searchTeamsch"], "dest": "lobby"},
         ],
         initial="user",
         auto_transitions=False,

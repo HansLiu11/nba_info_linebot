@@ -4,11 +4,6 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from datetime import datetime, date, timedelta, timezone
-import nba_api as nba
-from nba_api.stats.endpoints import leaguegamefinder, boxscoretraditionalv2, teamdetails
-from nba_api.stats.static import teams
-
-
 
 from dotenv import load_dotenv
 from linebot import LineBotApi
@@ -224,7 +219,7 @@ def send_menu_carousel(uid):
                         ),
                         MessageTemplateAction(
                             label='Game Schedule',
-                            text='show game schedule',
+                            text='game schedules',
                         )
                     ]
                 ),
@@ -579,9 +574,42 @@ def showStatleader(uid):
         
     push_text_message(uid, result)
     
-def showTeam(uid):
-     url = "https://stats.nba.com/js/data/widgets/home_season.json"
+def showteamsch(reply_token, team):
+    team_lw = team.lower()
+    url = f"https://tw.global.nba.com/stats2/team/schedule.json?countryCode=TW&locale=zh_TW&teamCode={team_lw}"
+    session = requests.Session()
+    response = session.get(url=url, headers=headers).json()
+    d = date.today()
+    months = response["payload"]["monthGroups"]
+    for m in months:
+        if m["number"] == d.month:
+            games = m['games']
+    result = ""
+    games = list(filter(lambda g:{d <= datetime.strptime(g['profile']['dateTimeEt'], '%Y-%m-%dT%H:%M').date()}, games))
+    for g in games[:5] :
+        gamedate = datetime.strptime(g['profile']['dateTimeEt'], '%Y-%m-%dT%H:%M').date()
+        gamedate = (gamedate + timedelta(1)).strftime('%Y-%m-%d')
+        result += (f"\U0001f4c6 {gamedate} \n")
+        gstatus = g['boxscore']['statusDesc']
+        if gstatus != "延期":
+            tm = g['profile']["dateTimeEt"]
+            tm = datetime.strptime(tm, '%Y-%m-%dT%H:%M')
+            # convert ET time to Taipei time
+            tm1 = tm.replace(tzinfo=timezone.utc)
+            gametime = tm1.astimezone(timezone(timedelta(hours=13))).strftime("%I:%M %p")
+            
+            hometeam = g['homeTeam']['profile']["nameEn"]
+            awayteam = g['awayTeam']['profile']["nameEn"]
+            
+            result += (f"\U000023f0 {gametime}\n")
+            if hometeam == team: 
+                result += (f"\U00002694 {team} vs {awayteam}\n\n")
+            else:
+                result += (f"\U00002694 {team} vs {hometeam}\n\n")
 
+    send_text_message(reply_token,result)
+    return "OK"
+    
 def shownews(reply_token):
     nba_news = []
     url = "https://nba.udn.com/nba/news/"
