@@ -42,10 +42,12 @@ pipenv shell
 Check the scores of the games on that day(Can choose **today**, **yesterday** or **enter other date** you want to know)
 ![](./img/6.jpg)
 
-1. Today game 
+1. Today game
+
 ![](./img/7.jpg)
 
 2. other date with hightlight links
+
 ![](./img/14.jpg)
 
 ### Check Schedule
