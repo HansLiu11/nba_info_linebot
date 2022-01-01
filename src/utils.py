@@ -368,22 +368,23 @@ def show_boxscore(uid, dateteam):
     gid = game['GAME_ID'].tolist()[0]
     searchteam_abbr = game['TEAM_ABBREVIATION'].values[0]
     opp_team = games[(games.GAME_ID==gid) & (games.TEAM_NAME != searchteam)]['TEAM_NAME'].values[0]
+    print(gid)
     
-    stats = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id = gid)
-    stats_df = stats.player_stats.get_data_frame()
-    stats_df = stats_df[stats_df.MIN.notnull()]
-    player_stats = stats_df.loc[:,info]
-    result = ("\U0001f3c0\U0001f3c0\U0001f3c0 {}\n\n" .format(searchteam))
-    result_opp = ("\U0001f3c0\U0001f3c0\U0001f3c0 {}\n\n" .format(opp_team))
-    for index, player in player_stats.iterrows():
-        if player['TEAM_ABBREVIATION'] == searchteam_abbr:
-            result += (f"\U0001F525\U000026f9\U0001F525 {player['PLAYER_NAME']} {player['MIN']}\n")
-            result += (f"{player['PTS']} PTS, {player['AST']} AST, {player['REB']} REB, {player['STL']} STL, {player['BLK']} BLK, {player['TO']} TOV\n\n")
-        else:
-            result_opp += (f"\U0001F525\U000026f9\U0001F525 {player['PLAYER_NAME']} {player['MIN']}\n")
-            result_opp += (f"{player['PTS']} PTS, {player['AST']} AST, {player['REB']} REB, {player['STL']} STL, {player['BLK']} BLK, {player['TO']} TOV\n\n")
-    push_text_message(uid, result)
-    push_text_message(uid, result_opp)
+    # stats = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id = gid)
+    # stats_df = stats.player_stats.get_data_frame()
+    # stats_df = stats_df[stats_df.MIN.notnull()]
+    # player_stats = stats_df.loc[:,info]
+    # result = ("\U0001f3c0\U0001f3c0\U0001f3c0 {}\n\n" .format(searchteam))
+    # result_opp = ("\U0001f3c0\U0001f3c0\U0001f3c0 {}\n\n" .format(opp_team))
+    # for index, player in player_stats.iterrows():
+    #     if player['TEAM_ABBREVIATION'] == searchteam_abbr:
+    #         result += (f"\U0001F525\U000026f9\U0001F525 {player['PLAYER_NAME']} {player['MIN']}\n")
+    #         result += (f"{player['PTS']} PTS, {player['AST']} AST, {player['REB']} REB, {player['STL']} STL, {player['BLK']} BLK, {player['TO']} TOV\n\n")
+    #     else:
+    #         result_opp += (f"\U0001F525\U000026f9\U0001F525 {player['PLAYER_NAME']} {player['MIN']}\n")
+    #         result_opp += (f"{player['PTS']} PTS, {player['AST']} AST, {player['REB']} REB, {player['STL']} STL, {player['BLK']} BLK, {player['TO']} TOV\n\n")
+    # push_text_message(uid, result)
+    # push_text_message(uid, result_opp)
     
 def showStatleader(uid):
     url = "https://stats.nba.com/js/data/widgets/home_season.json"

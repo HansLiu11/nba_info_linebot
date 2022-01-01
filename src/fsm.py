@@ -142,7 +142,7 @@ class TocMachine(GraphMachine):
 
         uid = event.source.user_id
         # send_text_message(reply_token, "Trigger boxScores") 
-        push_text_message(uid=uid, message="請輸入比賽日期和隊伍, Ex:2021-12-22 Orlando Magic")
+        push_text_message(uid=uid, message="請輸入比賽日期和隊伍, Ex:2021-12-22 Magic")
         
     def on_enter_showBoxscores(self, event):
         print("I'm entering showBoxscores")
