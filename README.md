@@ -32,15 +32,45 @@ pipenv shell
 
 ## Features
 
+![](./img/4.jpg)
+
 ### Menu
 ![menu](./img/menu.jpg)
+![menu2](./img/5.jpg)
 
 ### Watch Games
-![](./img/2.jpg)
+Check the scores of the games on that day(Can choose **today**, **yesterday** or **enter other date** you want to know)
+![](./img/6.jpg)
 
-![](./img/3.jpg)
+1. Today game 
+![](./img/7.jpg)
 
-![](./img/1.jpg)
+2. other date with hightlight links
+![](./img/14.jpg)
+
+### Check Schedule
+![](./img/8.jpg)
+1. Tommorrow's schedule - 
+Showing the game schedule today and tomorrow 
+![](./img/12.jpg)
+![](./img/13.jpg)
+2. Team's schedule - 
+Can select one team to show their next 5 games' schedule
+![](./img/9.jpg)
+![](./img/10.jpg)
+
+### Show Standings
+Showing the team standings
+![](./img/11.jpg)
+
+### Show Stats Leader
+Showing the stat leaders. (PPG / Assists / Rebounds / 3PM / Steals / Blocks)
+![](./img/15.jpg)
+
+### Show NBA news
+Show the latest 10 NBA news and links to the news
+![](./img/news1.jpg)
+![](./img/news2.jpg)
 
 ## Reference
 [Pipenv](https://medium.com/@chihsuan/pipenv-更簡單-更快速的-python-套件管理工具-135a47e504f4) ❤️ [@chihsuan](https://github.com/chihsuan)

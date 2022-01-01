@@ -260,7 +260,7 @@ class TocMachine(GraphMachine):
         text = event.message.text 
         try:
             showteamsch(reply_token, text)
-            img = "https://boundtoball.com/wp-content/uploads/2021/07/NBA-TEAM-LOGOS.jpg"
+            img = "https://img.sportsv.net/img/article/cover/3/79623/fit-LV7Ph7Arzu-945x495.png"
             labels = ["回主選單"]
             texts = ["go back to menu"]
             discription = "回主選單"
