@@ -119,6 +119,12 @@ def create_machine():
                 "conditions": "is_going_to_backLobby",
              },
             {
+                "trigger": "advance", 
+                "source": ["gameScores", "yesterdayGame","todayGame", "boxScores", "showotherGame","showBoxscores" , "showStanding", "gameSchedule","statLeader", "showNews", "showSchedule", "showTeamsch"],
+                "dest": "iniit",
+                "conditions": "is_going_to_backinit",
+             },
+            {
                 "trigger": "advance",
                 "source": "showotherGame",
                 "dest": "otherGame",
