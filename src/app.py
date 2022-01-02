@@ -83,14 +83,11 @@ def webhook_handler():
         # Create a machine for new user
         if event.source.user_id not in machines:
             machines[event.source.user_id] = create_machine()
-            
-        print(f"\nFSM STATE: {machines[event.source.user_id].state}")
-        print(f"REQUEST BODY: \n{body}")    
         
         # Advance the FSM for each MessageEvent
         response = machines[event.source.user_id].advance(event)
         if response == False:
-            send_text_message(event.reply_token, "Invalid, Please Try Again")
+            send_text_message(event.reply_token, "無法識別指令，請重新再試")
 
     return "OK"
 

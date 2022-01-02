@@ -250,7 +250,6 @@ class TocMachine(GraphMachine):
         texts = ["Nets","Bulls","Warriors","Mavericks","Lakers","Bucks","Suns","Clippers"]
         
         send_img_carousel(uid, urls, labels, texts)
-        # send_text_message(reply_token, "Trigger boxScores") 
         push_text_message(uid, message="請選擇上面隊伍和或輸入其他隊伍, Ex:Magic")
     
     def on_enter_showTeamsch(self, event):
