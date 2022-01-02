@@ -295,7 +295,7 @@ def show_Games(reply_token, date:str):
         gstatus = game['boxscore']['statusDesc']
         
         # Get Game profile
-        NBA_gameId = game['profile']['gameId']
+        gameId = game['profile']['gameId']
 
         # Home/Away Team
         NBA_homeTeam = game['homeTeam']
@@ -303,13 +303,13 @@ def show_Games(reply_token, date:str):
 
         # HomeTeam - Profile
         Home_profile = NBA_homeTeam['profile']
-        Home_name = Home_profile['displayAbbr']
+        Home_name = Home_profile['nameEn']
         Home_abbr = Home_profile['abbr']
         Home_logo_url = 'https://tw.global.nba.com/media/img/teams/00/logos/{}_logo.png'.format(Home_abbr)
 
         # AwayTeam - Profile
         Away_profile = NBA_awayTeam['profile']
-        Away_name = Away_profile['displayAbbr']
+        Away_name = Away_profile['nameEn']
         Away_abbr = Away_profile['abbr']
         Away_logo_url = 'https://tw.global.nba.com/media/img/teams/00/logos/{}_logo.png'.format(Away_abbr)
 
@@ -334,14 +334,14 @@ def show_Games(reply_token, date:str):
             gametime = tm1.astimezone(timezone(timedelta(hours=13))).strftime("%I:%M %p")
             
             response['body']['contents'][0]['contents'][0]['contents'][1]['url'] = str(Home_logo_url)
-            response['body']['contents'][0]['contents'][0]['contents'][2]['text'] = '{} - {}'.format(Home_wins, Home_losses)
+            response['body']['contents'][0]['contents'][0]['contents'][2]['text'] = f'{Home_wins} - {Home_losses}'
             
             response['body']['contents'][0]['contents'][1]['contents'][2]['text'] = gametime
 
             response['body']['contents'][0]['contents'][2]['contents'][0]['contents'][1]['url'] = str(Away_logo_url)
-            response['body']['contents'][0]['contents'][2]['contents'][0]['contents'][2]['text'] = '{} - {}'.format(Away_wins, Away_losses)
+            response['body']['contents'][0]['contents'][2]['contents'][0]['contents'][2]['text'] = f'{Away_wins} - {Away_losses}'
             
-            response['footer']['contents'][0]['contents'][0]['action']['uri'] = 'https://tw.global.nba.com/preview/#!/'.format(NBA_gameId)
+            response['footer']['contents'][0]['contents'][0]['action']['uri'] = 'https://tw.global.nba.com/preview/#!/'.format(gameId)
 
             bubbles.append(response)
             continue
@@ -356,14 +356,14 @@ def show_Games(reply_token, date:str):
             response = json.load(open('json/NotStarted.json','r',encoding='utf-8'))
 
             response['body']['contents'][0]['contents'][0]['contents'][1]['url'] = str(Home_logo_url)
-            response['body']['contents'][0]['contents'][0]['contents'][2]['text'] = '{} - {}'.format(Home_wins, Home_losses)
+            response['body']['contents'][0]['contents'][0]['contents'][2]['text'] = f'{Home_wins} - {Home_losses}'
             
             response['body']['contents'][0]['contents'][1]['contents'][2]['text'] = gametime
 
             response['body']['contents'][0]['contents'][2]['contents'][0]['contents'][1]['url'] = str(Away_logo_url)
-            response['body']['contents'][0]['contents'][2]['contents'][0]['contents'][2]['text'] = '{} - {}'.format(Away_wins, Away_losses)
+            response['body']['contents'][0]['contents'][2]['contents'][0]['contents'][2]['text'] = f'{Away_wins} - {Away_losses}'
             
-            response['footer']['contents'][0]['contents'][0]['action']['uri'] = 'https://tw.global.nba.com/preview/#!/'.format(NBA_gameId)
+            response['footer']['contents'][0]['contents'][0]['action']['uri'] = f'https://tw.global.nba.com/preview/#!/{gameId}'
 
             bubbles.append(response)
             continue
@@ -427,7 +427,7 @@ def show_Games(reply_token, date:str):
 
         # Set HomeTeam Bubble
         board['body']['contents'][0]['contents'][0]['contents'][1]['url'] = str(Home_logo_url)
-        board['body']['contents'][0]['contents'][0]['contents'][2]['text'] = '{} - {}'.format(Home_wins, Home_losses)
+        board['body']['contents'][0]['contents'][0]['contents'][2]['text'] = f'{Home_wins} - {Home_losses}'
 
         # Set Total Score
         board['body']['contents'][0]['contents'][1]['contents'][2]['text'] = str(Home_totScore)
@@ -435,7 +435,7 @@ def show_Games(reply_token, date:str):
 
         # Set AwayTeam board
         board['body']['contents'][0]['contents'][3]['contents'][0]['contents'][1]['url'] = str(Away_logo_url)
-        board['body']['contents'][0]['contents'][3]['contents'][0]['contents'][2]['text'] = '{} - {}'.format(Away_wins, Away_losses)
+        board['body']['contents'][0]['contents'][3]['contents'][0]['contents'][2]['text'] = f'{Away_wins} - {Away_losses}'
 
         # Set Name
         board['body']['contents'][2]['contents'][0]['contents'][1]['text'] = Home_name
@@ -464,10 +464,10 @@ def show_Games(reply_token, date:str):
             Buttom['contents'][0]['action']['label'] = '收看直播'
             Buttom['contents'][0]['action']['uri'] = str(NBA_Live)
             board['footer']['contents'].append(Buttom)
-        if(NBA_gameId is not None):
+        if(gameId is not None):
             Buttom = json.load(open('json/Buttom.json','r',encoding='utf-8'))
             Buttom['contents'][0]['action']['label'] = '數據統計'
-            Buttom['contents'][0]['action']['uri'] = 'https://tw.global.nba.com/boxscore/#!/{}'.format(NBA_gameId)
+            Buttom['contents'][0]['action']['uri'] = f'https://tw.global.nba.com/boxscore/#!/{gameId}'
             board['footer']['contents'].append(Buttom)
         if(NBA_Hightlight is not None):
             Buttom = json.load(open('json/Buttom.json','r',encoding='utf-8'))
@@ -491,7 +491,7 @@ def show_Games(reply_token, date:str):
     line_bot_api.reply_message(reply_token, reply_msg)
     return "OK"
 
-def show_tmw_schedule(uid):
+def show_tmw_schedule(reply_token):
     
     url = "https://tw.global.nba.com/stats2/season/schedule.json?countryCode=TW&days=2&locale=zh_TW&tz=%2B8"
     
@@ -534,7 +534,7 @@ def show_tmw_schedule(uid):
                     awayteam = game['awayTeam']['teamName']
                     result += (f"\n\U00002694 {hometeam} V.S. {awayteam}")
         
-        push_text_message(uid,result)
+        send_text_message(reply_token,result)
     return "OK"
 
 def show_standings(uid):
@@ -644,7 +644,7 @@ def show_boxscore(uid, dateteam):
     push_text_message(uid, result)
     push_text_message(uid, result_opp)
     
-def showStatleader(uid):
+def showStatleader(reply_token):
     url = "https://stats.nba.com/js/data/widgets/home_season.json"
     response = requests.get(url=url, headers=headers).json()
     seasonLeaders = response["items"][0]["items"]
@@ -687,7 +687,7 @@ def showStatleader(uid):
         player = threeptsleader["playerstats"][i]
         result += "{}  {} 3PM\n".format(player['PLAYER_NAME'], player['FG3M'])
         
-    push_text_message(uid, result)
+    send_text_message(reply_token, result)
     
 def showteamsch(reply_token, team):
     team_lw = team.lower()

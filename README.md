@@ -9,7 +9,7 @@ Watch game results, boxscores, check the schedule, standings and serch for favor
 
 ## QR code
 <p align="center">
-  <img src="https://qr-official.line.me/sid/L/366ndjdc.png" ,height="200" width="200"/>
+  <img src="https://qr-official.line.me/sid/L/961dzevm.png" ,height="200" width="200"/>
 </p>
 
 ## Setup
@@ -63,13 +63,19 @@ Check the scores of the games on that day(Can choose **today**, **yesterday** or
 1. **Today game**
 
 <p align="center">
-  <img src="./img/7.jpg", height="350" width="190"/>
+  <img src="./img/3.jpg", height="350" width="190"/>
 </p>
 
-2. **other date with hightlight links**
+2. **Yesterday game**
 
 <p align="center">
   <img src="./img/14.jpg", height="350" width="190"/>
+</p>
+
+3. **other date with no game**
+
+<p align="center">
+  <img src="./img/16.jpg", height="350" width="190"/>
 </p>
 
 ### Check Schedule

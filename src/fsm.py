@@ -205,7 +205,7 @@ class TocMachine(GraphMachine):
 
         uid = event.source.user_id
         reply_token = event.reply_token
-        show_tmw_schedule(uid)
+        show_tmw_schedule(reply_token)
         
         img = "https://brasilturis.com.br/wp-content/uploads/2020/06/nba-define-volta-dos-jogos-para-31-de-julho-em-complexo-da-disney-1.jpg"
         labels = ["回主選單"]
@@ -216,9 +216,9 @@ class TocMachine(GraphMachine):
     def on_enter_statLeader(self, event):
         print("I'm entering statLeader")
 
-        # reply_token = event.reply_token
+        reply_token = event.reply_token
         uid = event.source.user_id
-        showStatleader(uid)
+        showStatleader(reply_token)
         
         img = "https://pgw.udn.com.tw/gw/photo.php?u=https://uc.udn.com.tw/photo/2021/10/24/0/14396126.jpeg&x=0&y=0&sw=0&sh=0&sl=W&fw=1050&exp=3600"
         labels = ["回主選單"]
