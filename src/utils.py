@@ -109,7 +109,7 @@ def send_flex_msg(reply_token,dicts):
                         "contents": [
                         {
                             "type": "text",
-                            "text": "2021/01/01",
+                            "text": date.today().strftime('%Y-%m-%d'),
                             "size": "xl",
                             "color": "#ffffff",
                             "weight": "bold"
