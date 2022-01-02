@@ -1,6 +1,7 @@
 import json
 import os
 from linebot.models.messages import StickerMessage
+from linebot.models.send_messages import ImageSendMessage
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -42,6 +43,15 @@ def push_text_message(uid, message):
 def send_sticker(uid, pid, sid):
     line_bot_api.push_message(uid, StickerMessage(package_id=pid, sticker_id=sid))
     
+    return "OK"
+
+def send_img(reply_token, url):
+    message = ImageSendMessage(
+        original_content_url=url,
+        preview_image_url= url
+    )
+    line_bot_api.reply_message(reply_token, message)
+
     return "OK"
 
 def send_img_carousel(uid, urls, labels, texts):
@@ -303,13 +313,13 @@ def show_Games(reply_token, date:str):
 
         # HomeTeam - Profile
         Home_profile = NBA_homeTeam['profile']
-        Home_name = Home_profile['nameEn']
+        Home_name = Home_profile['displayAbbr']
         Home_abbr = Home_profile['abbr']
         Home_logo_url = 'https://tw.global.nba.com/media/img/teams/00/logos/{}_logo.png'.format(Home_abbr)
 
         # AwayTeam - Profile
         Away_profile = NBA_awayTeam['profile']
-        Away_name = Away_profile['nameEn']
+        Away_name = Away_profile['displayAbbr']
         Away_abbr = Away_profile['abbr']
         Away_logo_url = 'https://tw.global.nba.com/media/img/teams/00/logos/{}_logo.png'.format(Away_abbr)
 

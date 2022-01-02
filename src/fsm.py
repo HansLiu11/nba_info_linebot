@@ -4,16 +4,24 @@ from transitions.extensions import GraphMachine
 import time
 from datetime import datetime, timedelta
 
-from utils import push_text_message, send_img_carousel, send_sticker, send_text_message, send_menu_carousel, send_button, show_Games, show_boxscore, show_standings, show_tmw_schedule, showStatleader, shownews, showteamsch
+from utils import push_text_message, send_img, send_img_carousel, send_sticker, send_text_message, send_menu_carousel, send_button, show_Games, show_boxscore, show_standings, show_tmw_schedule, showStatleader, shownews, showteamsch
 
 
 class TocMachine(GraphMachine):
     def __init__(self, **machine_configs):
         self.machine = GraphMachine(model=self, **machine_configs)
 
-    def is_going_to_lobby(self, event):
+    def is_going_to_init(self, event):
         text = event.message.text
         return True
+    
+    def is_going_to_showFsm(self, event):
+        text = event.message.text
+        return text.lower() == "show fsm"
+    
+    def is_going_to_lobby(self, event):
+        text = event.message.text
+        return text == "主選單"
     
     def is_going_to_gameScores(self, event):
         text = event.message.text
@@ -81,6 +89,21 @@ class TocMachine(GraphMachine):
     def is_going_to_backotherGame(self, event):
         text = event.message.text
         return text.lower() == "go back"
+
+    def on_enter_init(self, event):
+        print("I'm entering init")
+        uid = event.source.user_id
+        img = "https://i.imgur.com/0Mmc4bp.png"
+        labels = ["Show FSM", "主選單"]
+        texts = ["show fsm", "主選單"]
+        discription = "請選擇功能"
+        send_button(uid, img, "功能列表", discription, texts, labels)
+
+    def on_enter_showFsm(self, event):
+        print("I'm entering showFsm")
+        reply_token = event.reply_token
+        send_img(reply_token, "https://i.imgur.com/PNcyjxZ.png")
+        self.go_back(event)
 
     def on_enter_lobby(self, event):
         print("I'm entering lobby")

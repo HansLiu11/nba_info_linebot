@@ -2,13 +2,25 @@ from fsm import TocMachine
 
 def create_machine():
     machine = TocMachine(
-        states=["user", "lobby", "gameScores","todayGame","yesterdayGame","otherGame","showotherGame","boxScores", "showBoxscores","showStanding","showSchedule", "gameSchedule","searchTeamsch" ,"showTeamsch", "statLeader", "showNews"],
+        states=["user", "init", "showFsm","lobby", "gameScores","todayGame","yesterdayGame","otherGame","showotherGame","boxScores", "showBoxscores","showStanding","showSchedule", "gameSchedule","searchTeamsch" ,"showTeamsch", "statLeader", "showNews"],
         transitions=[
             {
                 "trigger": "advance",
                 "source": "user",
+                "dest": "init",
+                "conditions": "is_going_to_init",
+            },
+            {
+                "trigger": "advance",
+                "source": "init",
                 "dest": "lobby",
                 "conditions": "is_going_to_lobby",
+            },
+            {
+                "trigger": "advance",
+                "source": "init",
+                "dest": "showFsm",
+                "conditions": "is_going_to_showFsm",
             },
             {
                 "trigger": "advance",
@@ -111,6 +123,11 @@ def create_machine():
                 "source": "showotherGame",
                 "dest": "otherGame",
                 "conditions": "is_going_to_backotherGame",
+            },
+            {
+                "trigger": "go_back",
+                "source": ["showFsm"],
+                "dest": "init",
             },
             {"trigger": "go_back", "source": ["gameScores", "yesterdayGame","todayGame","showotherGame","showTeamsch" ,"boxScores", "showBoxscores", "showStanding", "showSchedule","gameSchedule","statLeader", "showNews", "searchTeamsch"], "dest": "lobby"},
         ],
