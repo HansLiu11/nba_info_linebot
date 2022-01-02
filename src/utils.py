@@ -1,9 +1,11 @@
+import json
 import os
 from linebot.models.messages import StickerMessage
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from datetime import datetime, date, timedelta, timezone
+import pytz
 
 from dotenv import load_dotenv
 from linebot import LineBotApi
@@ -269,111 +271,224 @@ def send_button(uid, imgurl, title, discrip, texts, labels):
     line_bot_api.push_message(uid, message)
      
      
-def show_todayGame(reply_token):
-    url = "https://tw.global.nba.com/stats2/scores/daily.json?countryCode=TW&locale=zh_TW&tz=%2B8"
+def show_Games(reply_token, date:str):
+    url = f"https://tw.global.nba.com/stats2/scores/daily.json?countryCode=TW&gameDate={date}&locale=zh_TW&tz=%2B8"
     
     session = requests.Session()
     response = session.get(url=url, headers=headers).json()
-    games = response["payload"]["date"]["games"]
-    today = date.today().strftime("%Y/%m/%d")
-    result = ""
-    result += (f"\U0001f4c6 {today} \n\n")
-    if len(games) == 0:
-        result += "\U0000274c No games today"
+    date_info = response["payload"]["date"]
+    nxtgamemillis = float(response["payload"]['nextAvailableDateMillis'])
+    nxtgamedate = datetime.utcfromtimestamp(nxtgamemillis / 1000.)
+    nxtgamedate = nxtgamedate.replace(tzinfo=timezone.utc).astimezone(pytz.timezone('Asia/Taipei'))
     
+    if date_info == None:
+        board = json.load(open('json/NoGame.json','r',encoding='utf-8'))
+        board['body']['contents'][2]['text'] = str(nxtgamedate)[:-6]
+        board['footer']['contents'][0]['action']['data'] = 'Get{}'.format(str(nxtgamedate)[:-6])
+        line_bot_api.reply_message(reply_token, FlexSendMessage('查詢結果~', board))
+        return
+    
+    bubbles = [] 
+    games = date_info["games"]
     for game in games :
+        board = json.load(open('json/Bubble.json','r',encoding='utf-8'))
         gstatus = game['boxscore']['statusDesc']
-        if gstatus == "結束":
-            homeScore = game['boxscore']['homeScore']
-            awayScore = game['boxscore']['awayScore']
-            if homeScore > awayScore:
-                winteam = game['homeTeam']['profile']["nameEn"]
-                loseteam = game['awayTeam']['profile']["nameEn"]
-                result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,homeScore))
-                result += ("\U0001f62d {} \U0001f3c0 {}\n\n".format(loseteam,awayScore))
-            else:
-                loseteam = game['homeTeam']['profile']["nameEn"]
-                winteam = game['awayTeam']['profile']["nameEn"]
-                result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,awayScore))
-                result += ("\U0001f62d {} \U0001f3c0 {}\n\n".format(loseteam,homeScore))
+        
+        # Get Game profile
+        NBA_gameId = game['profile']['gameId']
+
+        # Home/Away Team
+        NBA_homeTeam = game['homeTeam']
+        NBA_awayTeam = game['awayTeam']
+
+        # HomeTeam - Profile
+        Home_profile = NBA_homeTeam['profile']
+        Home_name = Home_profile['displayAbbr']
+        Home_abbr = Home_profile['abbr']
+        Home_logo_url = 'https://tw.global.nba.com/media/img/teams/00/logos/{}_logo.png'.format(Home_abbr)
+
+        # AwayTeam - Profile
+        Away_profile = NBA_awayTeam['profile']
+        Away_name = Away_profile['displayAbbr']
+        Away_abbr = Away_profile['abbr']
+        Away_logo_url = 'https://tw.global.nba.com/media/img/teams/00/logos/{}_logo.png'.format(Away_abbr)
+
+        # HomeTeam - matchup
+        Home_matchup = NBA_homeTeam['matchup']
+        Home_losses = Home_matchup['losses']
+        Home_wins = Home_matchup['wins']
+
+        # AwayTeam - matchup
+        Away_matchup = NBA_awayTeam['matchup']
+        Away_losses = Away_matchup['losses']
+        Away_wins = Away_matchup['wins']
+
+        
+        if gstatus == "延期":
+            response = json.load(open('json/Pospond.json','r',encoding='utf-8'))
+            
+            tm = game['profile']["dateTimeEt"]
+            tm = datetime.strptime(tm, '%Y-%m-%dT%H:%M')
+            # convert ET time to Taipei time
+            tm1 = tm.replace(tzinfo=timezone.utc)
+            gametime = tm1.astimezone(timezone(timedelta(hours=13))).strftime("%I:%M %p")
+            
+            response['body']['contents'][0]['contents'][0]['contents'][1]['url'] = str(Home_logo_url)
+            response['body']['contents'][0]['contents'][0]['contents'][2]['text'] = '{} - {}'.format(Home_wins, Home_losses)
+            
+            response['body']['contents'][0]['contents'][1]['contents'][2]['text'] = gametime
+
+            response['body']['contents'][0]['contents'][2]['contents'][0]['contents'][1]['url'] = str(Away_logo_url)
+            response['body']['contents'][0]['contents'][2]['contents'][0]['contents'][2]['text'] = '{} - {}'.format(Away_wins, Away_losses)
+            
+            response['footer']['contents'][0]['contents'][0]['action']['uri'] = 'https://tw.global.nba.com/preview/#!/'.format(NBA_gameId)
+
+            bubbles.append(response)
+            continue
+        
         elif "ET" in gstatus:
             tm = game['profile']["dateTimeEt"]
             tm = datetime.strptime(tm, '%Y-%m-%dT%H:%M')
             # convert ET time to Taipei time
             tm1 = tm.replace(tzinfo=timezone.utc)
             gametime = tm1.astimezone(timezone(timedelta(hours=13))).strftime("%I:%M %p")
-            hometeam = game['homeTeam']['profile']["nameEn"]
-            awayteam = game['awayTeam']['profile']["nameEn"]
-            result += (f"\U00002694 {hometeam} vs {awayteam}\n")
-            result += (f"\U000023f0 {gametime}\n\n")
             
-        else:
-            homeScore = game['boxscore']['homeScore']
-            awayScore = game['boxscore']['awayScore']
-            hometeam = game['homeTeam']['profile']["nameEn"]
-            awayteam = game['awayTeam']['profile']["nameEn"]
-            retime = game['boxscore']['periodClock']
-            result += (f"\U0001f525 {gstatus} {retime}\n")
-            result += ("{} \U0001f3c0 {}\n".format(hometeam,homeScore))
-            result += ("{} \U0001f3c0 {}\n\n".format(awayteam,awayScore))
-            
+            response = json.load(open('json/NotStarted.json','r',encoding='utf-8'))
 
-    result += "Pospond: "         
-    for game in games:
-        gstatus = game['boxscore']['statusDesc']
-        if gstatus == "延期":
-            hometeam = game['homeTeam']['profile']["nameEn"]
-            awayteam = game['awayTeam']['profile']["nameEn"]
-            result += (f"\n\U00002694 {hometeam} V.S. {awayteam}")
+            response['body']['contents'][0]['contents'][0]['contents'][1]['url'] = str(Home_logo_url)
+            response['body']['contents'][0]['contents'][0]['contents'][2]['text'] = '{} - {}'.format(Home_wins, Home_losses)
             
+            response['body']['contents'][0]['contents'][1]['contents'][2]['text'] = gametime
+
+            response['body']['contents'][0]['contents'][2]['contents'][0]['contents'][1]['url'] = str(Away_logo_url)
+            response['body']['contents'][0]['contents'][2]['contents'][0]['contents'][2]['text'] = '{} - {}'.format(Away_wins, Away_losses)
+            
+            response['footer']['contents'][0]['contents'][0]['action']['uri'] = 'https://tw.global.nba.com/preview/#!/'.format(NBA_gameId)
+
+            bubbles.append(response)
+            continue
         
-    # gamescore = scoreboard.ScoreBoard().games.get_dict()
-    send_text_message(reply_token,result)
-    return "OK"
+        
+        # URLs
+        NBA_Hightlight = None
+        NBA_Live = None
+        if(len(game['urls']) > 0):
+            NBA_Hightlight = game['urls'][0]['value']
+            # NBA_Live = game['urls'][1]['value']
 
-def show_Games(reply_token, date:str):
-    # gamedate = datetime.strptime(date,"%Y-%m-%d")
-    # gamedate = (gamedate - timedelta(1)).strftime('%Y-%m-%d')
-    url = f"https://tw.global.nba.com/stats2/scores/daily.json?countryCode=TW&gameDate={date}&locale=zh_TW&tz=%2B8"
-    session = requests.Session()
-    response = session.get(url=url, headers=headers).json()
-    games = response["payload"]["date"]["games"]
-    date = date.replace("-","/")
-    result = ""
-    result += (f"\U0001f4c6 {date} \n\n")
-    if len(games) == 0:
-        result += "\U0000274c No scheduled games"
-    
-    for game in games :
-        gstatus = game['boxscore']['statusDesc']
-        if gstatus == "結束":
-            homeScore = game['boxscore']['homeScore']
-            awayScore = game['boxscore']['awayScore']
-            if homeScore > awayScore:
-                winteam = game['homeTeam']['profile']["nameEn"]
-                loseteam = game['awayTeam']['profile']["nameEn"]
-                result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,homeScore))
-                result += ("\U0001f62d {} \U0001f3c0 {}\n".format(loseteam,awayScore))
+        # HomeTeam - score
+        Home_score = NBA_homeTeam['score']
+        Home_main_score = []
+        for i in range(4):
+            Home_main_score.append(Home_score['q{}Score'.format(i+1)])
+        for i in range(10):
+            Home_main_score.append(Home_score['ot{}Score'.format(i+1)])
+        
+        Home_totScore = Home_score['score']
+
+        # Home - pointGameLeader
+        Home_pointGameLeader = NBA_homeTeam['pointGameLeader']
+        Home_pointGameLeader_Name = Home_pointGameLeader['profile']['displayName']
+        Home_pointGameLeader_Points = Home_pointGameLeader['statTotal']['points']
+
+        # Home - assistGameLeader
+        Home_assistGameLeader = NBA_homeTeam['assistGameLeader']
+        Home_assistGameLeader_Name = Home_assistGameLeader['profile']['displayName']
+        Home_assistGameLeader_Assists = Home_assistGameLeader['statTotal']['assists']
+
+        # Home - reboundGameLeader
+        Home_reboundGameLeader = NBA_homeTeam['reboundGameLeader']
+        Home_reboundGameLeader_Name = Home_reboundGameLeader['profile']['displayName']
+        Home_reboundGameLeader_Rebs = Home_reboundGameLeader['statTotal']['rebs']
+
+        # AwayTeam - score
+        Away_score = NBA_awayTeam['score']
+        Away_main_score = []
+        for i in range(4):
+            Away_main_score.append(Away_score['q{}Score'.format(i+1)])
+        for i in range(10):
+            Away_main_score.append(Away_score['ot{}Score'.format(i+1)])
+        Away_totScore = Away_score['score']
+
+        # Away - pointGameLeader
+        Away_pointGameLeader = NBA_awayTeam['pointGameLeader']
+        Away_pointGameLeader_Name = Away_pointGameLeader['profile']['displayName']
+        Away_pointGameLeader_Points = Away_pointGameLeader['statTotal']['points']
+
+        # Away - assistGameLeader
+        Away_assistGameLeader = NBA_awayTeam['assistGameLeader']
+        Away_assistGameLeader_Name = Away_assistGameLeader['profile']['displayName']
+        Away_assistGameLeader_Assists = Away_assistGameLeader['statTotal']['assists']
+
+        # Away - reboundGameLeader
+        Away_reboundGameLeader = NBA_awayTeam['reboundGameLeader']
+        Away_reboundGameLeader_Name = Away_reboundGameLeader['profile']['displayName']
+        Away_reboundGameLeader_Rebs = Away_reboundGameLeader['statTotal']['rebs']
+
+        # Set HomeTeam Bubble
+        board['body']['contents'][0]['contents'][0]['contents'][1]['url'] = str(Home_logo_url)
+        board['body']['contents'][0]['contents'][0]['contents'][2]['text'] = '{} - {}'.format(Home_wins, Home_losses)
+
+        # Set Total Score
+        board['body']['contents'][0]['contents'][1]['contents'][2]['text'] = str(Home_totScore)
+        board['body']['contents'][0]['contents'][2]['contents'][2]['text'] = str(Away_totScore)
+
+        # Set AwayTeam board
+        board['body']['contents'][0]['contents'][3]['contents'][0]['contents'][1]['url'] = str(Away_logo_url)
+        board['body']['contents'][0]['contents'][3]['contents'][0]['contents'][2]['text'] = '{} - {}'.format(Away_wins, Away_losses)
+
+        # Set Name
+        board['body']['contents'][2]['contents'][0]['contents'][1]['text'] = Home_name
+        board['body']['contents'][2]['contents'][0]['contents'][2]['text'] = Away_name
+
+        # Set Scores
+        for i in range(4):
+            Score = json.load(open('json/Score.json','r',encoding='utf-8'))
+            Score['contents'][0]['text'] = '第{}局'.format(i+1)
+            Score['contents'][1]['text'] = str(Home_main_score[i])
+            Score['contents'][2]['text'] = str(Away_main_score[i])
+            board['body']['contents'][2]['contents'].append(Score)
+        for i in range(4,14):
+            if(Home_main_score[i] == 0 and Away_main_score[i] == 0):
+                break
             else:
-                loseteam = game['homeTeam']['profile']["nameEn"]
-                winteam = game['awayTeam']['profile']["nameEn"]
-                result += ("\U0001f3c6 {} \U0001f3c0 {}\n".format(winteam,awayScore))
-                result += ("\U0001f62d {} \U0001f3c0 {}\n".format(loseteam,homeScore))
-            if len(game['urls']) > 0:
-                url = game['urls'][0]["value"]
-                result += "Highlights : " + url + "\n\n"
-            else:
-                result += "\n"
+                Score = json.load(open('json/Score.json','r',encoding='utf-8'))
+                Score['contents'][0]['text'] = 'OT{}'.format(i-4)
+                Score['contents'][1]['text'] = str(Home_main_score[i])
+                Score['contents'][2]['text'] = str(Away_main_score[i])
+                board['body']['contents'][2]['contents'].append(Score)
+
+        # Set URLs
+        if(NBA_Live is not None):
+            Buttom = json.load(open('json/Buttom.json','r',encoding='utf-8'))
+            Buttom['contents'][0]['action']['label'] = '收看直播'
+            Buttom['contents'][0]['action']['uri'] = str(NBA_Live)
+            board['footer']['contents'].append(Buttom)
+        if(NBA_gameId is not None):
+            Buttom = json.load(open('json/Buttom.json','r',encoding='utf-8'))
+            Buttom['contents'][0]['action']['label'] = '數據統計'
+            Buttom['contents'][0]['action']['uri'] = 'https://tw.global.nba.com/boxscore/#!/{}'.format(NBA_gameId)
+            board['footer']['contents'].append(Buttom)
+        if(NBA_Hightlight is not None):
+            Buttom = json.load(open('json/Buttom.json','r',encoding='utf-8'))
+            Buttom['contents'][0]['action']['label'] = 'Hightlights'
+            Buttom['contents'][0]['action']['uri'] = str(NBA_Hightlight)
+            board['footer']['contents'].append(Buttom)
+        
+        bubbles.append(board)
+        # break
+    # print (bubbles)
+            
+    msg = {
+        "type": "carousel",
+        "contents": bubbles
+    }
+    reply_msg = FlexSendMessage(
+        alt_text='查詢結果~',
+        contents=msg
+    )
     
-    result += "Pospond: "         
-    for game in games:
-        gstatus = game['boxscore']['statusDesc']
-        if gstatus == "延期":
-            hometeam = game['homeTeam']['profile']["nameEn"]
-            awayteam = game['awayTeam']['profile']["nameEn"]
-            result += (f"\n\U00002694 {hometeam} V.S. {awayteam}")
-    
-    send_text_message(reply_token,result)
+    line_bot_api.reply_message(reply_token, reply_msg)
     return "OK"
 
 def show_tmw_schedule(uid):

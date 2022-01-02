@@ -106,6 +106,12 @@ def create_machine():
                 "dest": "lobby",
                 "conditions": "is_going_to_backLobby",
              },
+            {
+                "trigger": "advance",
+                "source": "showotherGame",
+                "dest": "otherGame",
+                "conditions": "is_going_to_backotherGame",
+            },
             {"trigger": "go_back", "source": ["gameScores", "yesterdayGame","todayGame","showotherGame","showTeamsch" ,"boxScores", "showBoxscores", "showStanding", "showSchedule","gameSchedule","statLeader", "showNews", "searchTeamsch"], "dest": "lobby"},
         ],
         initial="user",

@@ -4,7 +4,7 @@ from transitions.extensions import GraphMachine
 import time
 from datetime import datetime, timedelta
 
-from utils import push_text_message, send_img_carousel, send_sticker, send_text_message, send_menu_carousel, send_button, show_Games, show_boxscore, show_standings, show_tmw_schedule, show_todayGame, showStatleader, shownews, showteamsch
+from utils import push_text_message, send_img_carousel, send_sticker, send_text_message, send_menu_carousel, send_button, show_Games, show_boxscore, show_standings, show_tmw_schedule, showStatleader, shownews, showteamsch
 
 
 class TocMachine(GraphMachine):
@@ -64,7 +64,7 @@ class TocMachine(GraphMachine):
     
     def is_going_to_showNews(self, event):
         text = event.message.text
-        return text.lower() == "show news"
+        return text.lower() == "t86"
     
     def is_going_to_searchTeamsch(self, event):
         text = event.message.text
@@ -77,6 +77,10 @@ class TocMachine(GraphMachine):
     def is_going_to_backLobby(self, event):
         text = event.message.text
         return text.lower() == "go back to menu"
+    
+    def is_going_to_backotherGame(self, event):
+        text = event.message.text
+        return text.lower() == "go back"
 
     def on_enter_lobby(self, event):
         print("I'm entering lobby")
@@ -97,9 +101,10 @@ class TocMachine(GraphMachine):
     def on_enter_todayGame(self, event):
         print("I'm entering todayGame")
 
+        today = datetime.today().strftime('%Y-%m-%d')
         uid = event.source.user_id
         reply_token = event.reply_token
-        show_todayGame(reply_token)
+        show_Games(reply_token, today)
         
         img = "https://cdn.nba.com/manage/2021/08/Web_Schedule_Announcement_Covers16x9-1-784x441.jpg"
         labels = ["比賽數據統計","回主選單"]
