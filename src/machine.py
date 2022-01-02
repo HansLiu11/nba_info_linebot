@@ -121,7 +121,7 @@ def create_machine():
             {
                 "trigger": "advance", 
                 "source": ["gameScores", "yesterdayGame","todayGame", "boxScores", "showotherGame","showBoxscores" , "showStanding", "gameSchedule","statLeader", "showNews", "showSchedule", "showTeamsch"],
-                "dest": "iniit",
+                "dest": "init",
                 "conditions": "is_going_to_backinit",
              },
             {

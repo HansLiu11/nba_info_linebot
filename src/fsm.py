@@ -88,7 +88,7 @@ class TocMachine(GraphMachine):
     
     def is_going_to_backinit(self, event):
         text = event.message.text
-        return text.lower() == "回功能列"
+        return text == "回功能列"
     
     def is_going_to_backotherGame(self, event):
         text = event.message.text
