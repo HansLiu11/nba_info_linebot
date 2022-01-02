@@ -72,7 +72,7 @@ class TocMachine(GraphMachine):
     
     def is_going_to_showNews(self, event):
         text = event.message.text
-        return text.lower() == "t86"
+        return text.lower() == "show news"
     
     def is_going_to_searchTeamsch(self, event):
         text = event.message.text
