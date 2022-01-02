@@ -106,7 +106,7 @@ class TocMachine(GraphMachine):
     def on_enter_showFsm(self, event):
         print("I'm entering showFsm")
         reply_token = event.reply_token
-        send_img(reply_token, "https://i.imgur.com/PNcyjxZ.png")
+        send_img(reply_token, "https://i.imgur.com/IX6V71Z.png")
         self.go_back(event)
 
     def on_enter_lobby(self, event):
